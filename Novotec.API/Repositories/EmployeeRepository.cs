@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Novotec.API.Interfaces;
-using NovotecDB.Models;
+using NovotecDB;
 
 namespace Novotec.API.Repositories;
 

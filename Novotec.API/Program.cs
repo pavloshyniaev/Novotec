@@ -5,7 +5,7 @@ using Microsoft.OpenApi.Models;
 using Novotec.API.Interfaces;
 using Novotec.API.Middlewares;
 using Novotec.API.Repositories;
-using NovotecDB.Models;
+using NovotecDB;
 
 var builder = WebApplication.CreateBuilder(args);
 

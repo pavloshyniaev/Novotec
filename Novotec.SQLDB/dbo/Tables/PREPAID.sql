@@ -1,0 +1,20 @@
+﻿CREATE TABLE [dbo].[PREPAID] (
+    [PEIDENT]    BIGINT          IDENTITY (1, 1) NOT NULL,
+    [PEDATE]     DATETIME        CONSTRAINT [DF_PREPAID_PEDATE] DEFAULT (getdate()) NULL,
+    [PEWHO]      BIGINT          CONSTRAINT [DF_PREPAID_PEWHO] DEFAULT ((0)) NOT NULL,
+    [PEACT]      DECIMAL (10, 2) CONSTRAINT [DF_PREPAID_PEACT] DEFAULT ((0)) NOT NULL,
+    [PEACTDATE]  DATETIME        NULL,
+    [PECHANGE]   DECIMAL (10, 2) CONSTRAINT [DF_PREPAID_PECHANGE] DEFAULT ((0)) NOT NULL,
+    [PECAIDENT]  BIGINT          CONSTRAINT [DF_PREPAID_PECAIDENT] DEFAULT ((0)) NOT NULL,
+    [PEDOWNLOAD] INT             CONSTRAINT [DF_PREPAID_PEDOWNLOAD] DEFAULT ((1)) NOT NULL,
+    CONSTRAINT [PK_PREPAID] PRIMARY KEY CLUSTERED ([PEIDENT] ASC)
+);
+
+
+GO
+EXECUTE sp_addextendedproperty @name = N'ENABLE_BROKER', @value = N'TRUE', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'PREPAID';
+
+
+GO
+EXECUTE sp_addextendedproperty @name = N'EVENT NOTIFICATION', @value = N'TRUE', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'PREPAID';
+

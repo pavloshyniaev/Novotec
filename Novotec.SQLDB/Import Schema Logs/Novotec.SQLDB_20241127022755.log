@@ -1,0 +1,86 @@
+27.11.2024 15:27:55	This log contains information about the import schema operation into project 'Novotec.SQLDB' on computer 'AGRARWARE' by user 'Pavlo'.
+27.11.2024 15:27:55	Import of database schema has started.
+27.11.2024 15:28:04	Gathering database credentials
+27.11.2024 15:28:04	Gathering database options
+27.11.2024 15:28:04	Gathering generic database scoped configuration option
+27.11.2024 15:28:04	Gathering users
+27.11.2024 15:28:04	Gathering roles
+27.11.2024 15:28:04	Gathering application roles
+27.11.2024 15:28:04	Gathering role memberships
+27.11.2024 15:28:04	Gathering filegroups
+27.11.2024 15:28:04	Gathering full-text catalogs
+27.11.2024 15:28:04	Gathering assemblies
+27.11.2024 15:28:04	Gathering certificates
+27.11.2024 15:28:04	Gathering asymmetric keys
+27.11.2024 15:28:04	Gathering symmetric keys
+27.11.2024 15:28:04	Gathering encrypted symmetric keys
+27.11.2024 15:28:04	Gathering schemas
+27.11.2024 15:28:04	Gathering XML schema collections
+27.11.2024 15:28:04	Gathering user-defined data types
+27.11.2024 15:28:04	Gathering user-defined types
+27.11.2024 15:28:04	Gathering table types
+27.11.2024 15:28:04	Gathering unique keys for table types
+27.11.2024 15:28:04	Gathering primary keys for table types
+27.11.2024 15:28:04	Gathering indexes for table types
+27.11.2024 15:28:04	Gathering check constraints for table types
+27.11.2024 15:28:04	Gathering default constraints for table types
+27.11.2024 15:28:04	Gathering partition functions
+27.11.2024 15:28:04	Gathering partition schemes
+27.11.2024 15:28:04	Gathering functions
+27.11.2024 15:28:04	Gathering encrypted functions
+27.11.2024 15:28:04	Gathering aggregates
+27.11.2024 15:28:04	Gathering procedures
+27.11.2024 15:28:05	Gathering encrypted procedures
+27.11.2024 15:28:05	Gathering tables
+27.11.2024 15:28:05	Gathering primary keys
+27.11.2024 15:28:05	Gathering unique constraints
+27.11.2024 15:28:05	Gathering foreign keys
+27.11.2024 15:28:05	Gathering default constraints
+27.11.2024 15:28:06	Gathering check constraints
+27.11.2024 15:28:06	Gathering views
+27.11.2024 15:28:06	Gathering encrypted views
+27.11.2024 15:28:06	Gathering indexes
+27.11.2024 15:28:06	Gathering statistics
+27.11.2024 15:28:06	Gathering full-text index stoplists
+27.11.2024 15:28:06	Gathering search property lists
+27.11.2024 15:28:06	Gathering search properties
+27.11.2024 15:28:06	Gathering full-text indexes
+27.11.2024 15:28:06	Gathering column store indexes
+27.11.2024 15:28:06	Gathering spatial indexes
+27.11.2024 15:28:06	Gathering XML indexes
+27.11.2024 15:28:06	Gathering Selective XML indexes
+27.11.2024 15:28:06	Gathering encrypted triggers
+27.11.2024 15:28:06	Gathering triggers
+27.11.2024 15:28:06	Gathering encrypted and clr ddl triggers
+27.11.2024 15:28:06	Gathering ddl triggers
+27.11.2024 15:28:06	Gathering synonyms
+27.11.2024 15:28:06	Gathering defaults
+27.11.2024 15:28:06	Gathering data constraint uddt bindings
+27.11.2024 15:28:06	Gathering rules
+27.11.2024 15:28:06	Gathering data constraint uddt bindings
+27.11.2024 15:28:06	Gathering message types
+27.11.2024 15:28:06	Gathering queues
+27.11.2024 15:28:06	Gathering contracts
+27.11.2024 15:28:06	Gathering services
+27.11.2024 15:28:06	Gathering event notifications
+27.11.2024 15:28:06	Gathering remote service bindings
+27.11.2024 15:28:06	Gathering broker priorities
+27.11.2024 15:28:06	Gathering signatures
+27.11.2024 15:28:06	Gathering compression options
+27.11.2024 15:28:06	Gathering sequence types
+27.11.2024 15:28:06	Gathering security policies
+27.11.2024 15:28:06	Gather column encryption keys
+27.11.2024 15:28:06	Gathering column master keys
+27.11.2024 15:28:06	Gathering external data sources
+27.11.2024 15:28:06	Gathering external file formats
+27.11.2024 15:28:06	Gathering external tables
+27.11.2024 15:28:06	Gathering extended properties
+27.11.2024 15:28:06	Gathering assemblies
+27.11.2024 15:28:06	Gathering credentials
+27.11.2024 15:28:06	Gathering logins
+27.11.2024 15:28:06	Gathering server audits
+27.11.2024 15:28:08	Scanning project for duplicate elements
+27.11.2024 15:28:09	Finished duplicate element processing
+27.11.2024 15:28:10	Finished importing database.
+27.11.2024 15:28:10	A summary of the import was saved to the following location: C:\Users\Pavlo\source\repos\Novotec\Novotec.SQLDB\Import Schema Logs\Novotec.SQLDB_20241127022755.log
+27.11.2024 15:28:10	Click Finish to continue...

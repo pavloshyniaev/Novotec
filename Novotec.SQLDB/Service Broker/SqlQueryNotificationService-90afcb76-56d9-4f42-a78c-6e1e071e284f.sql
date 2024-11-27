@@ -1,0 +1,3 @@
+﻿CREATE QUEUE [dbo].[SqlQueryNotificationService-90afcb76-56d9-4f42-a78c-6e1e071e284f]
+    WITH POISON_MESSAGE_HANDLING(STATUS = OFF), ACTIVATION (STATUS = ON, PROCEDURE_NAME = [dbo].[SqlQueryNotificationStoredProcedure-90afcb76-56d9-4f42-a78c-6e1e071e284f], MAX_QUEUE_READERS = 1, EXECUTE AS OWNER);
+

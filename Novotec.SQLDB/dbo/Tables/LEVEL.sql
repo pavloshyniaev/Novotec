@@ -1,0 +1,24 @@
+﻿CREATE TABLE [dbo].[LEVEL] (
+    [LEIDENT] BIGINT       IDENTITY (1, 1) NOT NULL,
+    [LEDATE]  DATETIME     NULL,
+    [LEWHO]   BIGINT       CONSTRAINT [DF_LEVEL_LEWHO] DEFAULT ((0)) NOT NULL,
+    [LELEVEL] INT          CONSTRAINT [DF_LEVEL_LELEVEL] DEFAULT ((0)) NOT NULL,
+    [LETEXT]  VARCHAR (30) CONSTRAINT [DF_LEVEL_LETEXT] DEFAULT ('') NOT NULL,
+    [LETYPE]  INT          CONSTRAINT [DF_LEVEL_LETYPE] DEFAULT ((0)) NOT NULL,
+    [LEMENU]  TINYINT      CONSTRAINT [DF_LEVEL_LEMENU] DEFAULT ((0)) NOT NULL,
+    CONSTRAINT [PK_LEVEL] PRIMARY KEY CLUSTERED ([LEIDENT] ASC)
+);
+
+
+GO
+CREATE NONCLUSTERED INDEX [INDEX_LEVEL_LELEVEL]
+    ON [dbo].[LEVEL]([LELEVEL] ASC);
+
+
+GO
+EXECUTE sp_addextendedproperty @name = N'ENABLE_BROKER', @value = N'TRUE', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'LEVEL';
+
+
+GO
+EXECUTE sp_addextendedproperty @name = N'EVENT NOTIFICATION', @value = N'TRUE', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'LEVEL';
+

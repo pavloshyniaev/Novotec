@@ -1,0 +1,18 @@
+﻿CREATE TABLE [dbo].[AGROUP] (
+    [AGIDENT]  BIGINT        IDENTITY (1, 1) NOT NULL,
+    [AGDATE]   DATETIME      CONSTRAINT [DF_AGROUP_AGDATE] DEFAULT (getdate()) NULL,
+    [AGWHO]    BIGINT        CONSTRAINT [DF_AGROUP_AGWHO] DEFAULT ((0)) NOT NULL,
+    [AGTITLE]  VARCHAR (50)  CONSTRAINT [DF_AGROUP_AGTITLE] DEFAULT ('') NOT NULL,
+    [AGNUMBER] VARCHAR (20)  CONSTRAINT [DF_AGROUP_AGNUMBER] DEFAULT ('') NOT NULL,
+    [AGMEMO]   VARCHAR (MAX) CONSTRAINT [DF_AGROUP_AGMEMO] DEFAULT ('') NOT NULL,
+    CONSTRAINT [PK_AGROUP] PRIMARY KEY CLUSTERED ([AGIDENT] ASC)
+);
+
+
+GO
+EXECUTE sp_addextendedproperty @name = N'ENABLE_BROKER', @value = N'TRUE', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'AGROUP';
+
+
+GO
+EXECUTE sp_addextendedproperty @name = N'EVENT NOTIFICATION', @value = N'TRUE', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'AGROUP';
+

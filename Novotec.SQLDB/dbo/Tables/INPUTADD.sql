@@ -1,0 +1,19 @@
+﻿CREATE TABLE [dbo].[INPUTADD] (
+    [IPIDENT]  BIGINT        IDENTITY (1, 1) NOT NULL,
+    [IPDATE]   DATETIME      NULL,
+    [IPWHO]    BIGINT        CONSTRAINT [DF_INPUTADD_IPWHO] DEFAULT ((0)) NOT NULL,
+    [IPNUMBER] VARCHAR (30)  CONSTRAINT [DF_INPUTADD_IPNUMBER] DEFAULT ('') NOT NULL,
+    [IPTITLE]  VARCHAR (50)  CONSTRAINT [DF_INPUTADD_IPTITLE] DEFAULT ('') NOT NULL,
+    [IPMEMO]   VARCHAR (MAX) CONSTRAINT [DF_INPUTADD_IPMEMO] DEFAULT ('') NOT NULL,
+    [IPTYPE]   INT           CONSTRAINT [DF_INPUTADD_IPTYPE] DEFAULT ((0)) NOT NULL,
+    CONSTRAINT [PK_INPUTADD] PRIMARY KEY CLUSTERED ([IPIDENT] ASC)
+);
+
+
+GO
+EXECUTE sp_addextendedproperty @name = N'ENABLE_BROKER', @value = N'TRUE', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'INPUTADD';
+
+
+GO
+EXECUTE sp_addextendedproperty @name = N'EVENT NOTIFICATION', @value = N'TRUE', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'INPUTADD';
+

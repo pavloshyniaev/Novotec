@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using Novotec.API.Dto;
 using Novotec.API.Interfaces;
-using NovotecDB.Models;
+using NovotecDB;
 
 namespace Novotec.API.Repositories;
 

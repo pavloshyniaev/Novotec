@@ -1,0 +1,19 @@
+﻿CREATE TABLE [dbo].[QUNITS] (
+    [QUIDENT]  BIGINT        IDENTITY (1, 1) NOT NULL,
+    [QUDATE]   DATETIME      CONSTRAINT [DF_QUNITS_QUDATE] DEFAULT (getdate()) NULL,
+    [QUWHO]    BIGINT        CONSTRAINT [DF_QUNITS_QUWHO] DEFAULT ((0)) NOT NULL,
+    [QUTITLE]  VARCHAR (50)  CONSTRAINT [DF_QUNITS_QUTITLE] DEFAULT ('') NOT NULL,
+    [QUNUMBER] VARCHAR (20)  CONSTRAINT [DF_QUNITS_QUNUMBER] DEFAULT ('') NOT NULL,
+    [QUMEMO]   VARCHAR (MAX) CONSTRAINT [DF_QUNITS_QUMEMO] DEFAULT ('') NOT NULL,
+    [QUFLTYPE] INT           CONSTRAINT [DF_QUNITS_QUFLTYPE] DEFAULT ((0)) NOT NULL,
+    CONSTRAINT [PK_QUNITS] PRIMARY KEY CLUSTERED ([QUIDENT] ASC)
+);
+
+
+GO
+EXECUTE sp_addextendedproperty @name = N'ENABLE_BROKER', @value = N'TRUE', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'QUNITS';
+
+
+GO
+EXECUTE sp_addextendedproperty @name = N'EVENT NOTIFICATION', @value = N'TRUE', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'QUNITS';
+
