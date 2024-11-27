@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Novotec.DB", "Novotec.DB\Novotec.DB.csproj", "{88D9D069-FF3E-49EE-8B55-FA3F8FFABABD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Novotec.API", "Novotec.API\Novotec.API.csproj", "{750D8EC5-29A9-4E9E-A7EF-9CC8CB41F567}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{88D9D069-FF3E-49EE-8B55-FA3F8FFABABD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88D9D069-FF3E-49EE-8B55-FA3F8FFABABD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88D9D069-FF3E-49EE-8B55-FA3F8FFABABD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88D9D069-FF3E-49EE-8B55-FA3F8FFABABD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{750D8EC5-29A9-4E9E-A7EF-9CC8CB41F567}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{750D8EC5-29A9-4E9E-A7EF-9CC8CB41F567}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{750D8EC5-29A9-4E9E-A7EF-9CC8CB41F567}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{750D8EC5-29A9-4E9E-A7EF-9CC8CB41F567}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
