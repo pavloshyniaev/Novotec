@@ -4,5 +4,5 @@ namespace Novotec.API.Interfaces;
 
 public interface IEmployeeRepository
 {
-    Task AddOrUpdate(List<DboEmployee> employees);
+    Task AddOrUpdate(List<Employee> employees);
 }

@@ -16,7 +16,7 @@ public class EmployeeController : ControllerBase
 
     [HttpPost]
     [Route("addOrUpdate")]
-    public async Task<IActionResult> AddOrUpdate(List<DboEmployee> employees)
+    public async Task<IActionResult> AddOrUpdate(List<Employee> employees)
     {
         try
         {

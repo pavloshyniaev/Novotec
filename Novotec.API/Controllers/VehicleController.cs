@@ -67,7 +67,7 @@ public class VehicleController : ControllerBase
                 var tractor = new VehicleDto()
                 {
                     PlateNumber = columns[2],
-                    InternalVehicleNumber = int.Parse(columns[3]),
+                    InternalVehicleNumber = columns[3],
                     CurrentCounter = int.Parse(columns[11]),
                 };
 

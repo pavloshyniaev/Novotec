@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Novotec.API.Interfaces;
 using NovotecDB;
+using NovotecDB.Models;
 
 namespace Novotec.API.Repositories;
 
@@ -13,12 +14,12 @@ public class EmployeeRepository : IEmployeeRepository
         _context = context;
     }
 
-    public async Task AddOrUpdate(List<DboEmployee> employees)
+    public async Task AddOrUpdate(List<Employee> employees)
     {
         var employeeIdentifiers = employees.Select(x => x.Emident);
-        var existingEmployees = await _context.DboEmployees.Where(x => employeeIdentifiers.Contains(x.Emident)).ToListAsync();
-        var employeesToAdd = new List<DboEmployee>();
-        var employeesToUpdate = new List<DboEmployee>();
+        var existingEmployees = await _context.Employees.Where(x => employeeIdentifiers.Contains(x.Emident)).ToListAsync();
+        var employeesToAdd = new List<Employee>();
+        var employeesToUpdate = new List<Employee>();
         foreach (var employee in employees)
         {
             var existingEmployee = existingEmployees.FirstOrDefault(x => x.Emident == employee.Emident);
@@ -52,11 +53,11 @@ public class EmployeeRepository : IEmployeeRepository
 
         if (employeesToAdd.Any())
         {
-            _context.DboEmployees.AddRange(employeesToAdd);
+            _context.Employees.AddRange(employeesToAdd);
         }
         if (employeesToUpdate.Any())
         {
-            _context.DboEmployees.UpdateRange(employeesToUpdate);
+            _context.Employees.UpdateRange(employeesToUpdate);
         }
 
         await _context.SaveChangesAsync();

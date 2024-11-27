@@ -3,6 +3,7 @@ using MySqlConnector;
 using Novotec.API.Dto;
 using Novotec.API.Interfaces;
 using NovotecDB;
+using NovotecDB.Models;
 
 namespace Novotec.API.Repositories;
 
@@ -18,19 +19,19 @@ public class VehicleRepository : IVehicleRepository
     public async Task AddOrUpdate(List<VehicleDto> vehicles)
     {
         var vehicleIdentifiers = vehicles.Select(x => x.InternalVehicleNumber);
-        var existingVehicles = await _context.DboVehicles.AsNoTracking().Where(x => x.Veintno != null && vehicleIdentifiers.Contains(x.Veintno.Value)).ToListAsync();
-        var vehiclesToAdd = new List<DboVehicle>();
-        var vehiclesToUpdate = new List<DboVehicle>();
+        var existingVehicles = await _context.Vehicles.Where(x => vehicleIdentifiers.Contains(x.Veintno)).ToListAsync();
+        var vehiclesToAdd = new List<Vehicle>();
+        var vehiclesToUpdate = new List<Vehicle>();
         foreach (var vehicleDto in vehicles)
         {
             var existingVehicle = existingVehicles.FirstOrDefault(x => x.Veintno == vehicleDto.InternalVehicleNumber);
             if (existingVehicle == null)
             {
-                var vehicle = new DboVehicle()
+                var vehicle = new Vehicle()
                 {
                     Veintno = vehicleDto.InternalVehicleNumber,
                     Vehours = vehicleDto.CurrentCounter,
-                    Veplate = vehicleDto.PlateNumber.Split(" ")[0]
+                    Veplate = vehicleDto.PlateNumber
                 };
                 vehiclesToAdd.Add(vehicle);
             }
@@ -38,7 +39,7 @@ public class VehicleRepository : IVehicleRepository
             {
                 existingVehicle.Veintno = vehicleDto.InternalVehicleNumber;
                 existingVehicle.Vehours = vehicleDto.CurrentCounter;
-                existingVehicle.Veplate = vehicleDto.PlateNumber.Split(" ")[0];
+                existingVehicle.Veplate = vehicleDto.PlateNumber;
                 // existingVehicle.Vecat = vehicle.Vecat;
                 // existingVehicle.Vecc = vehicle.Vecc;
                 // existingVehicle.Vedate = vehicle.Vedate;
