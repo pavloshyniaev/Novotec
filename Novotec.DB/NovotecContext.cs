@@ -6696,7 +6696,7 @@ public partial class NovotecContext : DbContext
             entity.Property(e => e.Sowho).HasColumnName("SOWHO");
         });
 
-        modelBuilder.Entity<System>(entity =>
+        modelBuilder.Entity<NovotecDB.Models.System>(entity =>
         {
             entity.HasKey(e => e.Syident);
 

@@ -31,7 +31,7 @@ public class VehicleRepository : IVehicleRepository
                 {
                     Veintno = vehicleDto.InternalVehicleNumber,
                     Vehours = vehicleDto.CurrentCounter,
-                    Veplate = vehicleDto.PlateNumber
+                    Veplate = vehicleDto.PlateNumber.Split(" ")[0]
                 };
                 vehiclesToAdd.Add(vehicle);
             }
@@ -39,7 +39,7 @@ public class VehicleRepository : IVehicleRepository
             {
                 existingVehicle.Veintno = vehicleDto.InternalVehicleNumber;
                 existingVehicle.Vehours = vehicleDto.CurrentCounter;
-                existingVehicle.Veplate = vehicleDto.PlateNumber;
+                existingVehicle.Veplate = vehicleDto.PlateNumber.Split(" ")[0];
                 // existingVehicle.Vecat = vehicle.Vecat;
                 // existingVehicle.Vecc = vehicle.Vecc;
                 // existingVehicle.Vedate = vehicle.Vedate;
@@ -64,31 +64,11 @@ public class VehicleRepository : IVehicleRepository
 
         if (vehiclesToAdd.Any())
         {
-            var sql = "INSERT INTO `dbo.VEHICLE` (Veintno, Vehours, Veplate) VALUES (@Veintno, @Vehours, @Veplate)";
-
-            foreach (var vehicleDto in vehiclesToAdd)
-            {
-                await _context.Database.ExecuteSqlRawAsync(sql, new[]
-                {
-                    new MySqlParameter("@Veintno", vehicleDto.Veintno),
-                    new MySqlParameter("@Vehours", vehicleDto.Vehours),
-                    new MySqlParameter("@Veplate", vehicleDto.Veplate ?? (object)DBNull.Value)
-                });
-            }
+            _context.Vehicles.AddRange(vehiclesToAdd);
         }
         if (vehiclesToUpdate.Any())
         {
-            var sqlUpdate = "UPDATE `dbo.VEHICLE` SET Vehours = @Vehours, Veplate = @Veplate WHERE Veintno = @Veintno";
-
-            foreach (var vehicle in vehiclesToUpdate)
-            {
-                await _context.Database.ExecuteSqlRawAsync(sqlUpdate, new[]
-                {
-                    new MySqlParameter("@Veintno", vehicle.Veintno),
-                    new MySqlParameter("@Vehours", vehicle.Vehours),
-                    new MySqlParameter("@Veplate", vehicle.Veplate ?? (object)DBNull.Value)
-                });
-            }
+            _context.Vehicles.UpdateRange(vehiclesToUpdate);
         }
 
         await _context.SaveChangesAsync();
