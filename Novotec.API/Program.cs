@@ -34,9 +34,7 @@ builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddDbContext<NovotecContext>(config =>
 {
-    config.UseMySql(builder.Configuration.GetConnectionString("pavlo"), 
-        new MySqlServerVersion(new Version(8, 0, 27)));
-    // config.UseSqlServer(builder.Configuration.GetConnectionString("novotec"));
+    config.UseSqlServer(builder.Configuration.GetConnectionString("novotec"));
 });
 
 var app = builder.Build();

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Novotec.API.Dto;
 using Novotec.API.Interfaces;
 using NovotecDB.Models;
 
@@ -16,11 +17,24 @@ public class EmployeeController : ControllerBase
 
     [HttpPost]
     [Route("addOrUpdate")]
-    public async Task<IActionResult> AddOrUpdate(List<Employee> employees)
+    public async Task<IActionResult> AddOrUpdate(List<PersonDto> employees)
     {
         try
         {
             await _employeeRepository.AddOrUpdate(employees);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    [HttpGet]
+    public async Task<IActionResult> GetEmployees()
+    {
+        try
+        {
+            await _employeeRepository.GetEmployees();
             return Ok();
         }
         catch (Exception ex)

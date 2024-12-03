@@ -29,52 +29,17 @@ public class VehicleController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
-    [HttpPost]
-    [Route("parseCsv")]
-    public async Task<IActionResult> AddOrUpdate()
+    [HttpGet]
+    public async Task<IActionResult> GetVehicles()
     {
         try
         {
-            var fileName = Path.Combine(Directory.GetCurrentDirectory(), "Tractors.csv");
-            var tractors = ParseCsv(fileName);
-            await _vehicleRepository.AddOrUpdate(tractors);
+            await _vehicleRepository.GetVehicles();
             return Ok();
         }
         catch (Exception ex)
         {
             return BadRequest(ex.Message);
         }
-    }
-    static List<VehicleDto> ParseCsv(string filePath)
-    {
-        var tractorDataList = new List<VehicleDto>();
-
-        using (var reader = new StreamReader(filePath))
-        {
-            string line;
-            bool isHeader = true;
-
-            while ((line = reader.ReadLine()) != null)
-            {
-                if (isHeader)
-                {
-                    isHeader = false;
-                    continue;
-                }
-
-                var columns = line.Split(';');
-
-                var tractor = new VehicleDto()
-                {
-                    PlateNumber = columns[2],
-                    InternalVehicleNumber = columns[3],
-                    CurrentCounter = int.Parse(columns[11]),
-                };
-
-                tractorDataList.Add(tractor);
-            }
-        }
-
-        return tractorDataList;
     }
 }
