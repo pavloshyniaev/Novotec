@@ -17,7 +17,7 @@ public class EmployeeController : ControllerBase
 
     [HttpPost]
     [Route("addOrUpdate")]
-    public async Task<IActionResult> AddOrUpdate(List<PersonDto> employees)
+    public async Task<IActionResult> AddOrUpdate([FromBody] List<PersonDto> employees)
     {
         try
         {
@@ -34,8 +34,8 @@ public class EmployeeController : ControllerBase
     {
         try
         {
-            await _employeeRepository.GetEmployees();
-            return Ok();
+            var employees = await _employeeRepository.GetEmployees();
+            return Ok(employees);
         }
         catch (Exception ex)
         {

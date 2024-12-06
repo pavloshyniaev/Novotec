@@ -17,7 +17,7 @@ public class VehicleController : ControllerBase
 
     [HttpPost]
     [Route("addOrUpdate")]
-    public async Task<IActionResult> AddOrUpdate(List<VehicleDto> vehicles)
+    public async Task<IActionResult> AddOrUpdate([FromBody] List<VehicleDto> vehicles)
     {
         try
         {
@@ -34,8 +34,8 @@ public class VehicleController : ControllerBase
     {
         try
         {
-            await _vehicleRepository.GetVehicles();
-            return Ok();
+            var vehicles = await _vehicleRepository.GetVehicles();
+            return Ok(vehicles);
         }
         catch (Exception ex)
         {

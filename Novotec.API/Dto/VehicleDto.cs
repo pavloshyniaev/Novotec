@@ -7,13 +7,13 @@ public class VehicleDto
     public string VehicleId => $"{VehicleCategory.ToString()[0]}{Id}";
     public int Id { get; set; }
     public VehicleCategory VehicleCategory { get; set; }
-    public int VehicleTypeId { get; set; }
+    public int VehicleTypeId { get; set; } // FahrZeugArt (LKW, PKW)
     public string VehicleTypeName { get; set; }
     public int VehicleFuelId { get; set; }
     public string VehicleFuelName { get; set; }
     public string Name { get; set; }
     public string ModelName { get; set; }
-    public string Fabricant { get; set; }
+    public string Fabricant { get; set; } // Manufacturer (MAN, Benz)
     public string PlateNr { get; set; }
     public string RegistrationNumber { get; set; }
     public string VehicleIdNumber { get; set; }
@@ -22,8 +22,14 @@ public class VehicleDto
     public int? CurrentKm { get; set; }
     public decimal? InitialCounter { get; set; }
     public decimal? CurrentCounter { get; set; }
+    public string ChipCode { get; set; }
     // we need vehicle chip as well to update chip entity 
     public VehicleCounterType VehicleCounterType => InitialKm == null ? VehicleCounterType.Hours : VehicleCounterType.Km;
+
+    public VehicleDto()
+    {
+        
+    }
 
     public VehicleDto(Vehicle vehicle)
     {

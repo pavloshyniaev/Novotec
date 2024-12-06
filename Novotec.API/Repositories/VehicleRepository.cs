@@ -20,6 +20,9 @@ public class VehicleRepository : IVehicleRepository
         var vehicleIdentifiers = vehicles.Select(x => x.VehicleId);
         // using divabbr as unused field for synchronizing ids, as in agrarware we have separate tables for vehicle type
         var existingVehicles = await _context.Vehicles.Where(x => vehicleIdentifiers.Contains(x.Vedivabbr)).ToListAsync(); 
+        var vehiclesToDelete = await _context.Vehicles
+            .Where(x => !vehicleIdentifiers.Contains(x.Vedivabbr))
+            .ToListAsync();
         foreach (var vehicleDto in vehicles)
         {
             var existingVehicle = existingVehicles.FirstOrDefault(x => x.Vedivabbr == vehicleDto.VehicleId);
@@ -89,6 +92,22 @@ public class VehicleRepository : IVehicleRepository
             }
             else
             {
+                // UPDATE [dbo].[VEHICLE] SET [VEDATE]='20241206 09:36:30.317', [VEWHO]=40, [VESTART]='20241206 00:00:00.000', [VEEND]='20241231 00:00:00.000', [VEMILES]=124100, [VEHOURS]=0.00, [VEKMOFFSET]=22, [VEOFFDATE]='20241206 00:00:00.000', [VESTATE]='gelöscht' WHERE [VEIDENT]=206
+                // UPDATE [dbo].[CARDS] SET [CADATE]='20241206 09:36:30.327', [CAVEIDENT]=0 WHERE [CAIDENT]=261
+                // UPDATE [dbo].[SVACCOUNT] SET [SVCAIDENT]=0 WHERE [SVIDENT]=249
+                // UPDATE [dbo].[WSTATION] SET [WSDATE]='20241206 09:36:52.013' WHERE [WSIDENT]=34
+                // INSERT INTO [dbo].[VTECH] ([VTIDENT], [VTDATE], [VTWHO], [VTTANK], [VTNORM], [VTTYRESIZ1], [VTTYRESIZ2], [VTTYRESIZ3], [VTTYRESIZ4], [VTTYRESIZ5], [VTTYRESIZE], [VTSTEER1], [VTSTEER2], [VTSTEER3], [VTSTEER4], [VTSTEER5], [VTLIFT1], [VTLIFT2], [VTLIFT3], [VTLIFT4], [VTLIFT5], [VTTWIN1], [VTTWIN2], [VTTWIN3], [VTTWIN4], [VTTWIN5], [VTGVW], [VTSWL], [VTRET], [VTUNDA], [VTMOTOR], [VTMPOWER], [VTCYCLAP], [VTSEATS], [VTSTAND], [VTMEMO], [VTLOADAREA], [VTHOLD], [VTLOADH], [VTLOADW], [VTLOADL], [VTPOS], [VTNEG], [VTCO2], [VTDATEMAINT], [VTTANKVOLMINP], [VTTANKVOLMAXP], [VTTANKH2KG], [VTMINTEMP], [VTMAXTEMP], [VTMAXP], [VTMINP], [VTH2TYPE]) 
+                // VALUES (19, '20241206 09:33:19.350', 41, 0, 0.0, '', '', '', '', '', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0.0, 0.0, 0, '19890101 00:00:00.000', 0, 0, 0, 0, 0, 0, 0, -1)
+                // INSERT INTO [dbo].[VTECH] ([VTIDENT], [VTDATE], [VTWHO], [VTTANK], [VTNORM], [VTTYRESIZ1], [VTTYRESIZ2], [VTTYRESIZ3], [VTTYRESIZ4], [VTTYRESIZ5], [VTTYRESIZE], [VTSTEER1], [VTSTEER2], [VTSTEER3], [VTSTEER4], [VTSTEER5], [VTLIFT1], [VTLIFT2], [VTLIFT3], [VTLIFT4], [VTLIFT5], [VTTWIN1], [VTTWIN2], [VTTWIN3], [VTTWIN4], [VTTWIN5], [VTGVW], [VTSWL], [VTRET], [VTUNDA], [VTMOTOR], [VTMPOWER], [VTCYCLAP], [VTSEATS], [VTSTAND], [VTMEMO], [VTLOADAREA], [VTHOLD], [VTLOADH], [VTLOADW], [VTLOADL], [VTPOS], [VTNEG], [VTCO2], [VTDATEMAINT], [VTTANKVOLMINP], [VTTANKVOLMAXP], [VTTANKH2KG], [VTMINTEMP], [VTMAXTEMP], [VTMAXP], [VTMINP], [VTH2TYPE]) 
+                // VALUES (206, '20241206 09:36:30.320', 40, 33, 5.0, '', '', '', '', '', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 0, 0, 'Freitag, 6. Dezember 2024 09:36', 0, 0, 0, 0, 0, 2.0, 2.0, 2, NULL, 0, 0, 0, 0, 0, 0, 0, -1)
+                // SET IDENTITY_INSERT [dbo].[CAHISTORY] ON
+                // INSERT INTO [dbo].[CAHISTORY] ([CHIDENT], [CHDATE], [CHWHO], [CHCAIDENT], [CHLEIDENT], [CHCOIDENT], [CHVEIDENT], [CHEMIDENT], [CHFCIDENT]) 
+                // VALUES (842, '20241206 09:36:30.000', 41, 261, 0, 0, 0, 0, 0)
+                // INSERT INTO [dbo].[CAHISTORY] ([CHIDENT], [CHDATE], [CHWHO], [CHCAIDENT], [CHLEIDENT], [CHCOIDENT], [CHVEIDENT], [CHEMIDENT], [CHFCIDENT]) 
+                // VALUES (843, '20241206 09:36:30.000', 41, 261, 0, 0, 0, 0, 0)
+                // INSERT INTO [dbo].[VREFATT] ([VRIDENT], [VRVCIDENT], [VRVEIDENT]) 
+                // VALUES (1, 1, 206)
+
                 existingVehicle.Veintno = vehicleDto.RegistrationNumber;
                 existingVehicle.Vehhstart = vehicleDto.InitialCounter.GetValueOrDefault();
                 existingVehicle.Vehours = vehicleDto.CurrentCounter.GetValueOrDefault();

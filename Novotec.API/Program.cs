@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Novotec.API.Dto;
 using Novotec.API.Interfaces;
 using Novotec.API.Middlewares;
 using Novotec.API.Repositories;
@@ -34,7 +35,10 @@ builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddDbContext<NovotecContext>(config =>
 {
-    config.UseSqlServer(builder.Configuration.GetConnectionString("novotec"));
+    config.UseSqlServer(builder.Configuration.GetConnectionString("novotec"), options =>
+    {
+        options.UseCompatibilityLevel(110);
+    });
 });
 
 var app = builder.Build();
