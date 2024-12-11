@@ -5,27 +5,27 @@ namespace NovotecDB.Models;
 
 public partial class Vehicle
 {
-    public long Veident { get; set; }
+    public long Veident { get; set; } // vehicle id
 
     public DateTime? Vedate { get; set; }
 
     public long Vewho { get; set; }
 
-    public string Veintno { get; set; } = null!;
+    public string Veintno { get; set; } = null!; // registration number
 
-    public string Vevehno { get; set; } = null!;
+    public string Vevehno { get; set; } = null!; // internal vehicle number
 
-    public string Veplate { get; set; } = null!;
+    public string Veplate { get; set; } = null!; // license plate
 
-    public string Vememo { get; set; } = null!;
+    public string Vememo { get; set; } = null!; // notes
 
     public long Vepbident { get; set; }
 
     public long Vepgident { get; set; }
 
-    public DateTime? Vestart { get; set; }
+    public DateTime? Vestart { get; set; } // start date
 
-    public DateTime? Veend { get; set; }
+    public DateTime? Veend { get; set; } // end date
 
     public long Veleident { get; set; }
 
@@ -39,9 +39,9 @@ public partial class Vehicle
 
     public long Vesrident { get; set; }
 
-    public int Vemiles { get; set; }
+    public int Vemiles { get; set; } // current km
 
-    public decimal Vehours { get; set; }
+    public decimal Vehours { get; set; } // current hours
 
     public byte Vetype { get; set; }
 
@@ -51,9 +51,9 @@ public partial class Vehicle
 
     public DateTime? Veoffdate { get; set; }
 
-    public int Vekmstart { get; set; }
+    public int Vekmstart { get; set; } // initial km
 
-    public decimal Vehhstart { get; set; }
+    public decimal Vehhstart { get; set; } // initial hours
 
     public string Veplate2 { get; set; } = null!;
 
@@ -69,5 +69,5 @@ public partial class Vehicle
 
     public string Vegroup { get; set; } = null!;
 
-    public int Vecat { get; set; }
+    public int Vecat { get; set; } // vehicle category
 }

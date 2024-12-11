@@ -5,7 +5,7 @@ namespace NovotecDB.Models;
 
 public partial class Address
 {
-    public long Adident { get; set; }
+    public long Adident { get; set; } // address id
 
     public long Adwho { get; set; }
 
@@ -13,21 +13,21 @@ public partial class Address
 
     public byte Adtype { get; set; }
 
-    public string Adloc { get; set; } = null!;
+    public string Adloc { get; set; } = null!; // city
 
-    public string Adzip { get; set; } = null!;
+    public string Adzip { get; set; } = null!; // zip-code
 
-    public string Adctry { get; set; } = null!;
+    public string Adctry { get; set; } = null!; // country
 
-    public string Adstr { get; set; } = null!;
+    public string Adstr { get; set; } = null!; // street
 
     public string Adhp { get; set; } = null!;
 
     public string Adpb { get; set; } = null!;
 
-    public string Adfname1 { get; set; } = null!;
+    public string Adfname1 { get; set; } = null!; // first name
 
-    public string Adlname1 { get; set; } = null!;
+    public string Adlname1 { get; set; } = null!; // last name
 
     public string Adtitle1 { get; set; } = null!;
 

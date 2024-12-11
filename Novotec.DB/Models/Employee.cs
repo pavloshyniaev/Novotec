@@ -5,19 +5,19 @@ namespace NovotecDB.Models;
 
 public partial class Employee
 {
-    public long Emident { get; set; }
+    public long Emident { get; set; } // employee id
 
     public DateTime? Emdate { get; set; }
 
     public long Emwho { get; set; }
 
-    public string Empersno { get; set; } = null!;
+    public string Empersno { get; set; } = null!; // personal number
 
-    public string Emdrivno { get; set; } = null!;
+    public string Emdrivno { get; set; } = null!; // driver license number
 
-    public DateTime? Emstart { get; set; }
+    public DateTime? Emstart { get; set; } // start date
 
-    public DateTime? Emend { get; set; }
+    public DateTime? Emend { get; set; } // end date
 
     public byte Emtype { get; set; }
 
@@ -25,9 +25,9 @@ public partial class Employee
 
     public long Emcoident { get; set; }
 
-    public long Emadident { get; set; }
+    public long Emadident { get; set; } // address id
 
-    public string Emmemo { get; set; } = null!;
+    public string Emmemo { get; set; } = null!; // notes
 
     public string Emstate { get; set; } = null!;
 

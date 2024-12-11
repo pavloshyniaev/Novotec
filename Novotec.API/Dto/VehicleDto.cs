@@ -8,11 +8,7 @@ public class VehicleDto
     public string Id { get; set; }
     public VehicleCategory VehicleCategory { get; set; }
     public int VehicleTypeId { get; set; } // FahrZeugArt (LKW, PKW)
-    public string? VehicleTypeName { get; set; }
     public int VehicleFuelId { get; set; }
-    public string? VehicleFuelName { get; set; }
-    public string? Name { get; set; }
-    public string? ModelName { get; set; }
     public string? Fabricant { get; set; } // Manufacturer (MAN, Benz)
     public string PlateNr { get; set; }
     public string RegistrationNumber { get; set; }

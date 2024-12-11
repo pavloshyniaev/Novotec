@@ -155,13 +155,14 @@ public class VehicleRepository : IVehicleRepository
             }
         }
 
-        await DeleteVehicles(vehiclesToDelete, true);
+        await DeleteVehicles(vehiclesToDelete, false);
         await _context.SaveChangesAsync();
     }
 
     public async Task<List<VehicleDto>> GetVehicles()
     {
-        return await _context.Vehicles.Select(x => new VehicleDto(x)).ToListAsync();
+        var currentTime = DateTime.Now;
+        return await _context.Vehicles.Where(x => x.Veend < currentTime).Select(x => new VehicleDto(x)).ToListAsync();
     }
     public async Task DeleteVehicles(List<Vehicle> vehicles, bool forceDelete)
     {
@@ -186,7 +187,7 @@ public class VehicleRepository : IVehicleRepository
         var existingCard = await _context.Cards.FirstOrDefaultAsync(x => x.Caveident == vehicleId);
         if (existingCard != null && existingCard.Cano != newCardNumber)
         {
-            existingCard.Caemident = 0;
+            existingCard.Caveident = 0;
 
             var cardHistory = new Cahistory()
             {
