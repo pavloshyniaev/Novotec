@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Novotec.API.Dto;
 using Novotec.API.Interfaces;
 using NovotecDB;
+using NovotecDB.AgrarwareConnectorModels;
 using NovotecDB.Models;
 
 namespace Novotec.API.Repositories;
@@ -9,24 +10,54 @@ namespace Novotec.API.Repositories;
 public class EmployeeRepository : IEmployeeRepository
 {
     private readonly NovotecContext _context;
+    private readonly AgrarwareConnectorContext _connectorContext;
 
-    public EmployeeRepository(NovotecContext context)
+    public EmployeeRepository(NovotecContext context, AgrarwareConnectorContext connectorContext)
     {
         _context = context;
+        _connectorContext = connectorContext;
     }
 
-    public async Task AddOrUpdate(List<PersonDto> employees)
+    private async Task SynchronizeIds(List<PersonDto> employees)
     {
-        var employeeIdentifiers = employees.Select(x => (long)x.PersonId);
-        var existingEmployees = await _context.Employees.Where(x => employeeIdentifiers.Contains(x.Emident)).ToListAsync();
+        var personalNumbers = employees.Select(e => e.PersonalNumber);
+        var existingEmployees = await _context.Employees.Where(x => personalNumbers.Contains(x.Empersno)).ToListAsync();
+        foreach (var existingEmployee in existingEmployees)
+        {
+            var employee = employees.FirstOrDefault(x => x.PersonalNumber == existingEmployee.Empersno);
+            if (employee != null)
+            {
+                var connectedEmployee = new EmployeeConnector()
+                {
+                    AgrarwareId = employee.PersonId,
+                    NovotecId = existingEmployee.Emident
+                };
+                _connectorContext.Employees.Add(connectedEmployee);
+            }
+        }
+        await _connectorContext.SaveChangesAsync();
+    }
+
+    private async Task<List<EmployeeConnector>> GetNovotecIds(List<PersonDto> employees)
+    {
+        var employeeIdentifiers = employees.Select(x => x.PersonId);
+        var novotecEmployeeIds = await _connectorContext.Employees.Where(x => employeeIdentifiers.Contains(x.AgrarwareId)).ToListAsync();
+        
+        return novotecEmployeeIds;
+    }
+    public async Task SynchronizeEmployees(List<PersonDto> employees)
+    {
+        await SynchronizeIds(employees);
+        var novotecEmployeeIds = await GetNovotecIds(employees);
+        var existingEmployees = await _context.Employees.Where(x => novotecEmployeeIds.Select(c => c.NovotecId).Contains(x.Emident)).ToListAsync();
         var employeesToDelete = await _context.Employees
-            .Where(x => !employeeIdentifiers.Contains(x.Emident))
+            .Where(x => !novotecEmployeeIds.Select(c => c.NovotecId).Contains(x.Emident))
             .ToListAsync();
         
         foreach (var employee in employees)
         {
-            var existingEmployee = existingEmployees.FirstOrDefault(x => x.Emident == employee.PersonId);
-            var card = await _context.Cards.FirstOrDefaultAsync(x => x.Cano == employee.ChipCode); // or chipNumber
+            var novotecId = novotecEmployeeIds.FirstOrDefault(x => x.AgrarwareId == employee.PersonId)?.NovotecId;
+            var existingEmployee = existingEmployees.FirstOrDefault(x => x.Emident == novotecId);
             if (existingEmployee == null)
             {
                     //++ UPDATE [dbo].[CARDS] SET [CADATE]='20241202 17:17:40.567', [CAWHO]=40, [CAEMIDENT]=232 WHERE [CAIDENT]=459
@@ -202,9 +233,10 @@ public class EmployeeRepository : IEmployeeRepository
         var newCard = await _context.Cards.FirstOrDefaultAsync(x => x.Cano == cardNumber);
         if (newCard != null)
         {
-            newCard.Caemident = employeeId;
+            // we probably need a check if this card was assigned to somebody else
             if (newCard.Caemident != employeeId)
             {
+                newCard.Caemident = employeeId;
                 var cardHistory = new Cahistory()
                 {
                     Chdate = DateTime.Now,
@@ -219,8 +251,8 @@ public class EmployeeRepository : IEmployeeRepository
                     svAccount.Svcaident = newCard.Caident;
                     _context.Svaccounts.Update(svAccount);
                 }
+                _context.Cards.Update(newCard);
             }
-            _context.Cards.Update(newCard);
         }
         else
         {
@@ -250,5 +282,6 @@ public class EmployeeRepository : IEmployeeRepository
                 _context.Svaccounts.Update(svAccount);
             }
         }
+        await _context.SaveChangesAsync();
     }
 }

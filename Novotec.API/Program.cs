@@ -40,10 +40,19 @@ builder.Services.AddDbContext<NovotecContext>(config =>
         options.UseCompatibilityLevel(110);
     });
 });
-
+builder.Services.AddDbContext<AgrarwareConnectorContext>(config =>
+{
+    config.UseSqlServer(builder.Configuration.GetConnectionString("agrarwareConnector"));
+});
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionLoggingMiddleware>();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AgrarwareConnectorContext>();
+    dbContext.Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Local"))
 {

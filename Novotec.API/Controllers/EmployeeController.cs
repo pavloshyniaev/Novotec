@@ -21,7 +21,7 @@ public class EmployeeController : ControllerBase
     {
         try
         {
-            await _employeeRepository.AddOrUpdate(employees);
+            await _employeeRepository.SynchronizeEmployees(employees);
             return Ok();
         }
         catch (Exception ex)

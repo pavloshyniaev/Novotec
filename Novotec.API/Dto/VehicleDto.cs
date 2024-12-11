@@ -4,16 +4,16 @@ namespace Novotec.API.Dto;
 
 public class VehicleDto
 {
-    public string VehicleId => $"{VehicleCategory.ToString()[0]}{Id}";
-    public int Id { get; set; }
+    // public string VehicleId => $"{VehicleCategory.ToString()[0]}{Id}";
+    public string Id { get; set; }
     public VehicleCategory VehicleCategory { get; set; }
     public int VehicleTypeId { get; set; } // FahrZeugArt (LKW, PKW)
-    public string VehicleTypeName { get; set; }
+    public string? VehicleTypeName { get; set; }
     public int VehicleFuelId { get; set; }
-    public string VehicleFuelName { get; set; }
-    public string Name { get; set; }
-    public string ModelName { get; set; }
-    public string Fabricant { get; set; } // Manufacturer (MAN, Benz)
+    public string? VehicleFuelName { get; set; }
+    public string? Name { get; set; }
+    public string? ModelName { get; set; }
+    public string? Fabricant { get; set; } // Manufacturer (MAN, Benz)
     public string PlateNr { get; set; }
     public string RegistrationNumber { get; set; }
     public string VehicleIdNumber { get; set; }
@@ -33,7 +33,7 @@ public class VehicleDto
 
     public VehicleDto(Vehicle vehicle)
     {
-        Id = (int)vehicle.Veident;
+        Id = vehicle.Veident.ToString();
         VehicleCategory = (VehicleCategory)vehicle.Vecat;
         PlateNr = vehicle.Veplate;
         RegistrationNumber = vehicle.Veintno;
