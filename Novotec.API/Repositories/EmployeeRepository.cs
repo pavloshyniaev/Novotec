@@ -27,12 +27,16 @@ public class EmployeeRepository : IEmployeeRepository
             var employee = employees.FirstOrDefault(x => x.PersonalNumber == existingEmployee.Empersno);
             if (employee != null)
             {
-                var connectedEmployee = new EmployeeConnector()
+                var existingConnection = await _connectorContext.Employees.FirstOrDefaultAsync(x => x.AgrarwareId == employee.PersonId);
+                if (existingConnection == null)
                 {
-                    AgrarwareId = employee.PersonId,
-                    NovotecId = existingEmployee.Emident
-                };
-                _connectorContext.Employees.Add(connectedEmployee);
+                    var connectedEmployee = new EmployeeConnector()
+                    {
+                        AgrarwareId = employee.PersonId,
+                        NovotecId = existingEmployee.Emident
+                    };
+                    _connectorContext.Employees.Add(connectedEmployee);
+                }
             }
         }
         await _connectorContext.SaveChangesAsync();
@@ -111,6 +115,14 @@ public class EmployeeRepository : IEmployeeRepository
 
                 await UnassignExistingCard(newEmployee.Emident, employee.ChipCode);
                 await AssignNewCard(newEmployee.Emident, employee.ChipCode);
+                
+                var connectedEmployee = new EmployeeConnector()
+                {
+                    AgrarwareId = employee.PersonId,
+                    NovotecId = newEmployee.Emident
+                };
+                _connectorContext.Employees.Add(connectedEmployee);
+                await _connectorContext.SaveChangesAsync();
             }
             else
             {
@@ -226,6 +238,8 @@ public class EmployeeRepository : IEmployeeRepository
 
             _context.Cards.Update(existingCard);
         }
+
+        await _context.SaveChangesAsync();
     }
 
     private async Task AssignNewCard(long employeeId, string cardNumber)

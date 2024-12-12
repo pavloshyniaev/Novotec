@@ -19,17 +19,21 @@ public class VehicleRepository : IVehicleRepository
     }
     private async Task SynchronizeIds(List<VehicleDto> vehicles)
     {
-        var personalNumbers = vehicles.Select(e => e.RegistrationNumber);
-        var existingVehicles = await _context.Vehicles.Where(x => personalNumbers.Contains(x.Veintno)).ToListAsync();
+        var registrationNumbers = vehicles.Select(e => e.RegistrationNumber);
+        var existingVehicles = await _context.Vehicles.Where(x => registrationNumbers.Contains(x.Veintno)).ToListAsync();
         foreach (var existingVehicle in existingVehicles)
         {
             var vehicle = vehicles.FirstOrDefault(x => x.RegistrationNumber == existingVehicle.Veintno);
             if (vehicle != null)
             {
-                var connectedVehicle = CreateConnector(vehicle.VehicleCategory, vehicle.Id, existingVehicle.Veident);
-                if (connectedVehicle != null)
+                var existingConnection = await ConnectorExists(vehicle.VehicleCategory, vehicle.Id);
+                if (existingConnection == null)
                 {
-                    _connectorContext.Add(connectedVehicle);
+                    var connectedVehicle = CreateConnector(vehicle.VehicleCategory, vehicle.Id, existingVehicle.Veident);
+                    if (connectedVehicle != null)
+                    {
+                        _connectorContext.Add(connectedVehicle);
+                    }
                 }
             }
         }
@@ -96,6 +100,7 @@ public class VehicleRepository : IVehicleRepository
                     Vekmstart = vehicle.InitialKm.GetValueOrDefault(),
                     Vemiles = vehicle.CurrentKm.GetValueOrDefault(),
                     Veplate = vehicle.PlateNr,
+                    Vevehno = vehicle.VehicleIdNumber,
                     Vecat = Convert.ToInt32(vehicle.VehicleCategory),
                 };
                 
@@ -117,6 +122,8 @@ public class VehicleRepository : IVehicleRepository
                 {
                     _connectorContext.Add(vehicleConnector);
                 }
+
+                await _connectorContext.SaveChangesAsync();
             }
             else
             {
@@ -141,6 +148,7 @@ public class VehicleRepository : IVehicleRepository
                 existingVehicle.Vekmstart = vehicle.InitialKm.GetValueOrDefault();
                 existingVehicle.Vemiles = vehicle.CurrentKm.GetValueOrDefault();
                 existingVehicle.Veplate = vehicle.PlateNr;
+                existingVehicle.Vevehno = vehicle.VehicleIdNumber;
                 existingVehicle.Vecat = Convert.ToInt32(vehicle.VehicleCategory);
                 
                 await UnassignExistingCard(existingVehicle.Veident, vehicle.ChipCode);
@@ -155,7 +163,7 @@ public class VehicleRepository : IVehicleRepository
             }
         }
 
-        await DeleteVehicles(vehiclesToDelete, false);
+        await DeleteVehicles(vehiclesToDelete, true);
         await _context.SaveChangesAsync();
     }
 
@@ -206,6 +214,8 @@ public class VehicleRepository : IVehicleRepository
 
             _context.Cards.Update(existingCard);
         }
+
+        await _context.SaveChangesAsync();
     }
 
     private async Task AssignNewCard(long vehicleId, string cardNumber)
@@ -287,6 +297,23 @@ public class VehicleRepository : IVehicleRepository
             },
             _ => null
         };
+    }
+    private async Task<IConnector?> ConnectorExists(VehicleCategory category, string agrarwareId)
+    {
+        switch (category)
+        {
+            case VehicleCategory.Normal:
+                return await _connectorContext.Vehicles.FirstOrDefaultAsync(x => x.AgrarwareId == agrarwareId);
+
+            case VehicleCategory.Tractor:
+                return await _connectorContext.Tractors.FirstOrDefaultAsync(x => x.AgrarwareId == agrarwareId);
+
+            case VehicleCategory.GoodsTransport:
+                return await _connectorContext.GoodsTransports.FirstOrDefaultAsync(x => x.AgrarwareId == agrarwareId);
+
+            default:
+                throw new InvalidOperationException($"Unknown category: {category}");
+        }
     }
 }
 // var vehicle = new
