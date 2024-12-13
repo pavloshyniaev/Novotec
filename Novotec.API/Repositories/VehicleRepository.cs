@@ -97,10 +97,12 @@ public class VehicleRepository : IVehicleRepository
                     Veintno = vehicle.RegistrationNumber,
                     Vehhstart = vehicle.InitialCounter.GetValueOrDefault(),
                     Vehours = vehicle.CurrentCounter.GetValueOrDefault(),
+                    Vetype = (byte)vehicle.VehicleCounterType,
                     Vekmstart = vehicle.InitialKm.GetValueOrDefault(),
                     Vemiles = vehicle.CurrentKm.GetValueOrDefault(),
                     Veplate = vehicle.PlateNr,
                     Vevehno = vehicle.VehicleIdNumber,
+                    Vedate = DateTime.Now,
                     Vecat = Convert.ToInt32(vehicle.VehicleCategory),
                 };
                 
@@ -147,8 +149,10 @@ public class VehicleRepository : IVehicleRepository
                 existingVehicle.Vehours = vehicle.CurrentCounter.GetValueOrDefault();
                 existingVehicle.Vekmstart = vehicle.InitialKm.GetValueOrDefault();
                 existingVehicle.Vemiles = vehicle.CurrentKm.GetValueOrDefault();
+                existingVehicle.Vetype = (byte)vehicle.VehicleCounterType;
                 existingVehicle.Veplate = vehicle.PlateNr;
                 existingVehicle.Vevehno = vehicle.VehicleIdNumber;
+                existingVehicle.Vedate = DateTime.Now;
                 existingVehicle.Vecat = Convert.ToInt32(vehicle.VehicleCategory);
                 
                 await UnassignExistingCard(existingVehicle.Veident, vehicle.ChipCode);
@@ -163,7 +167,7 @@ public class VehicleRepository : IVehicleRepository
             }
         }
 
-        await DeleteVehicles(vehiclesToDelete, true);
+        await DeleteVehicles(vehiclesToDelete, false);
         await _context.SaveChangesAsync();
     }
 

@@ -97,6 +97,7 @@ public class EmployeeRepository : IEmployeeRepository
                     Emstart = employee.ContractFrom,
                     Emend = employee.ContractTo,
                     Emadident = address.Adident,
+                    Emdate = DateTime.Now,
                 };
                 
                 _context.Employees.Add(newEmployee);
@@ -159,12 +160,13 @@ public class EmployeeRepository : IEmployeeRepository
                 existingEmployee.Empersno = employee.PersonalNumber;
                 existingEmployee.Emstart = employee.ContractFrom;
                 existingEmployee.Emend = employee.ContractTo;
+                existingEmployee.Emdate = DateTime.Now;
 
                 _context.Employees.Update(existingEmployee);
             }
         }
 
-        await DeleteEmployees(employeesToDelete, true);
+        await DeleteEmployees(employeesToDelete, false);
 
         await _context.SaveChangesAsync();
     }
