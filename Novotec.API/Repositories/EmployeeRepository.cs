@@ -216,6 +216,22 @@ public class EmployeeRepository : IEmployeeRepository
         }
         await _context.SaveChangesAsync();
     }
+    public async Task DeleteDuplicates()
+    {
+        var duplicateEmployees = await _context.Employees
+            .GroupBy(x => x.Empersno)
+            .Where(g => g.Count() > 1)
+            .SelectMany(g => g)
+            .ToListAsync();
+        
+        foreach (var employee in duplicateEmployees)
+        {
+            await UnassignExistingCard(employee.Emident, "");
+        }
+        
+        _context.Employees.RemoveRange(duplicateEmployees);
+        await _context.SaveChangesAsync();
+    }
     private async Task UnassignExistingCard(long employeeId, string newCardNumber)
     {
         var existingCard = await _context.Cards.FirstOrDefaultAsync(x => x.Caemident == employeeId);
@@ -272,6 +288,8 @@ public class EmployeeRepository : IEmployeeRepository
         }
         else
         {
+            //INSERT INTO [dbo].[REFERENCE] ([REIDENT], [RECAIDENT], [REAUIDENT], [REDOWN], [REATT], [RETYPE], [RELOCK], [REPIN], [RECODE], [RECODENSC], [REMILEAGE], [RERANGE], [READDIN], [REAPIDENT], [REAPIDENT2], [REAPIDENT3], [REAPIDENT4], [REAPIDENT5], [REAPIDENT6], [REAPIDENT7], [REAPIDENT8], [REAPIDENT9], [REAPIDENT10], [REAPGROUP], [RELEX], [RESECOND], [RELIMIT], [REMESSNO], [RECC], [REOFFGROUP], [REHH], [RECOLSTATE], [REOGIDENT], [RECRIDENT], [REDIAL], [REPRIVATE], [REVALID], [REEXPIRE], [REQUANT], [REDIALOG], [REPINONL], [REAUTOCNT])
+            //VALUES (541, 542, 1, 1, 0, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, '', 0)
             newCard = new Card()
             {
                 Caemident = employeeId,
@@ -282,6 +300,14 @@ public class EmployeeRepository : IEmployeeRepository
             };
             _context.Cards.Add(newCard);
             await _context.SaveChangesAsync();
+            
+            var reference = new Reference()
+            {
+                Recaident = newCard.Caident,
+                Reauident = 1, // this is automat identifier
+                Redown = 1
+            };
+            _context.References.Add(reference);
             
             var cardHistory = new Cahistory()
             {
