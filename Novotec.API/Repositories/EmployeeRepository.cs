@@ -234,27 +234,25 @@ public class EmployeeRepository : IEmployeeRepository
     }
     private async Task UnassignExistingCard(long employeeId, string newCardNumber)
     {
-        var existingCard = await _context.Cards.FirstOrDefaultAsync(x => x.Caemident == employeeId);
-        if (existingCard != null && existingCard.Cano != newCardNumber)
+        var existingCards = await _context.Cards.Where(x => x.Caemident == employeeId).ToListAsync();
+        foreach(var existingCard in existingCards)
         {
-            existingCard.Caemident = 0;
-
-            var cardHistory = new Cahistory()
+            // check here if this card is the one we want to assign
+            if (existingCard != null && existingCard.Cano != newCardNumber)
             {
-                Chdate = DateTime.Now,
-                Chemident = 0,
-                Chcaident = existingCard.Caident
-            };
-            _context.Cahistories.Add(cardHistory);
+                existingCard.Caemident = 0;
 
-            var svAccount = await _context.Svaccounts.FirstOrDefaultAsync(x => x.Svcaident == existingCard.Caident);
-            if (svAccount != null)
-            {
-                svAccount.Svcaident = 0;
-                _context.Svaccounts.Update(svAccount);
+                await UpdateCardHistory(0, existingCard.Caident);
+
+                var svAccount = await _context.Svaccounts.FirstOrDefaultAsync(x => x.Svcaident == existingCard.Caident);
+                if (svAccount != null)
+                {
+                    svAccount.Svcaident = 0;
+                    _context.Svaccounts.Update(svAccount);
+                }
+
+                _context.Cards.Update(existingCard);
             }
-
-            _context.Cards.Update(existingCard);
         }
 
         await _context.SaveChangesAsync();
