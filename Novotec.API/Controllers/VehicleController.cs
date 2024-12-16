@@ -16,8 +16,8 @@ public class VehicleController : ControllerBase
     }
 
     [HttpPost]
-    [Route("addOrUpdate")]
-    public async Task<IActionResult> AddOrUpdate([FromBody] List<VehicleDto> vehicles)
+    [Route("synchronize")]
+    public async Task<IActionResult> Synchronize([FromBody] List<VehicleDto> vehicles)
     {
         try
         {

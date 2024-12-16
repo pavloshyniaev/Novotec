@@ -16,8 +16,8 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpPost]
-    [Route("addOrUpdate")]
-    public async Task<IActionResult> AddOrUpdate([FromBody] List<PersonDto> employees)
+    [Route("synchronize")]
+    public async Task<IActionResult> Synchronize([FromBody] List<PersonDto> employees)
     {
         try
         {

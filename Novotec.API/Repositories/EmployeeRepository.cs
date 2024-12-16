@@ -269,61 +269,51 @@ public class EmployeeRepository : IEmployeeRepository
             if (newCard.Caemident != employeeId)
             {
                 newCard.Caemident = employeeId;
-                var cardHistory = new Cahistory()
-                {
-                    Chdate = DateTime.Now,
-                    Chemident = employeeId,
-                    Chcaident = newCard.Caident
-                };
-                _context.Cahistories.Add(cardHistory);
-
-                var svAccount = await _context.Svaccounts.FirstOrDefaultAsync(x => x.Svcaident == 0);
-                if (svAccount != null)
-                {
-                    svAccount.Svcaident = newCard.Caident;
-                    _context.Svaccounts.Update(svAccount);
-                }
+                
                 _context.Cards.Update(newCard);
+                
+                await UpdateCardHistory(employeeId, newCard.Caident);
+                await SetCardActive(newCard.Caident);
             }
         }
         else
         {
-            //INSERT INTO [dbo].[REFERENCE] ([REIDENT], [RECAIDENT], [REAUIDENT], [REDOWN], [REATT], [RETYPE], [RELOCK], [REPIN], [RECODE], [RECODENSC], [REMILEAGE], [RERANGE], [READDIN], [REAPIDENT], [REAPIDENT2], [REAPIDENT3], [REAPIDENT4], [REAPIDENT5], [REAPIDENT6], [REAPIDENT7], [REAPIDENT8], [REAPIDENT9], [REAPIDENT10], [REAPGROUP], [RELEX], [RESECOND], [RELIMIT], [REMESSNO], [RECC], [REOFFGROUP], [REHH], [RECOLSTATE], [REOGIDENT], [RECRIDENT], [REDIAL], [REPRIVATE], [REVALID], [REEXPIRE], [REQUANT], [REDIALOG], [REPINONL], [REAUTOCNT])
-            //VALUES (541, 542, 1, 1, 0, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, '', 0)
-            newCard = new Card()
+            newCard = await _context.Cards.FirstOrDefaultAsync(x => x.Caemident == 0 && x.Catype == 1);
+            if (newCard == null)
             {
-                Caemident = employeeId,
-                Cano = cardNumber,
-                Cano2 = cardNumber,
-                Catype = 1,
-                Cadate = DateTime.Now
-            };
-            _context.Cards.Add(newCard);
-            await _context.SaveChangesAsync();
-            
-            var reference = new Reference()
-            {
-                Recaident = newCard.Caident,
-                Reauident = 1, // this is automat identifier
-                Redown = 1
-            };
-            _context.References.Add(reference);
-            
-            var cardHistory = new Cahistory()
-            {
-                Chdate = DateTime.Now,
-                Chemident = employeeId,
-                Chcaident = newCard.Caident
-            };
-            _context.Cahistories.Add(cardHistory);
-
-            var svAccount = await _context.Svaccounts.FirstOrDefaultAsync(x => x.Svcaident == 0);
-            if (svAccount != null)
-            {
-                svAccount.Svcaident = newCard.Caident;
-                _context.Svaccounts.Update(svAccount);
+                throw new ArgumentException("No unassigned cards left");
             }
+
+            newCard.Cano = cardNumber;
+            newCard.Cano2 = cardNumber;
+            newCard.Caemident = employeeId;
+            
+            _context.Cards.Update(newCard);
+
+            await UpdateCardHistory(employeeId, newCard.Caident);
+            await SetCardActive(newCard.Caident);
         }
         await _context.SaveChangesAsync();
+    }
+
+    private async Task UpdateCardHistory(long employeeId, long cardId)
+    {
+        var cardHistory = new Cahistory()
+        {
+            Chdate = DateTime.Now,
+            Chemident = employeeId,
+            Chcaident = cardId
+        };
+        await _context.Cahistories.AddAsync(cardHistory);
+    }
+
+    private async Task SetCardActive(long cardId)
+    {
+        var svAccount = await _context.Svaccounts.FirstOrDefaultAsync(x => x.Svcaident == 0);
+        if (svAccount != null)
+        {
+            svAccount.Svcaident = cardId;
+            _context.Svaccounts.Update(svAccount);
+        }
     }
 }
