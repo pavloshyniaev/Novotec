@@ -238,7 +238,7 @@ public class EmployeeRepository : IEmployeeRepository
         foreach(var existingCard in existingCards)
         {
             // check here if this card is the one we want to assign
-            if (existingCard != null && existingCard.Cano != newCardNumber)
+            if (existingCard.Cano != newCardNumber)
             {
                 existingCard.Caemident = 0;
 

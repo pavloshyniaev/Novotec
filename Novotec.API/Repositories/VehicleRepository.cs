@@ -196,27 +196,25 @@ public class VehicleRepository : IVehicleRepository
     }
     private async Task UnassignExistingCard(long vehicleId, string newCardNumber)
     {
-        var existingCard = await _context.Cards.FirstOrDefaultAsync(x => x.Caveident == vehicleId);
-        if (existingCard != null && existingCard.Cano != newCardNumber)
+        var existingCards = await _context.Cards.Where(x => x.Caveident == vehicleId).ToListAsync();
+        foreach(var existingCard in existingCards)
         {
-            existingCard.Caveident = 0;
-
-            var cardHistory = new Cahistory()
+            // check here if this card is the one we want to assign
+            if (existingCard.Cano != newCardNumber)
             {
-                Chdate = DateTime.Now,
-                Chveident = 0,
-                Chcaident = existingCard.Caident
-            };
-            _context.Cahistories.Add(cardHistory);
+                existingCard.Caveident = 0;
 
-            var svAccount = await _context.Svaccounts.FirstOrDefaultAsync(x => x.Svcaident == existingCard.Caident);
-            if (svAccount != null)
-            {
-                svAccount.Svcaident = 0;
-                _context.Svaccounts.Update(svAccount);
+                await UpdateCardHistory(0, existingCard.Caident);
+
+                var svAccount = await _context.Svaccounts.FirstOrDefaultAsync(x => x.Svcaident == existingCard.Caident);
+                if (svAccount != null)
+                {
+                    svAccount.Svcaident = 0;
+                    _context.Svaccounts.Update(svAccount);
+                }
+
+                _context.Cards.Update(existingCard);
             }
-
-            _context.Cards.Update(existingCard);
         }
 
         await _context.SaveChangesAsync();
@@ -231,54 +229,53 @@ public class VehicleRepository : IVehicleRepository
             if (newCard.Caveident != vehicleId)
             {
                 newCard.Caveident = vehicleId;
-                var cardHistory = new Cahistory()
-                {
-                    Chdate = DateTime.Now,
-                    Chveident = vehicleId,
-                    Chcaident = newCard.Caident
-                };
-                _context.Cahistories.Add(cardHistory);
-
-                var svAccount = await _context.Svaccounts.FirstOrDefaultAsync(x => x.Svcaident == 0);
-                if (svAccount != null)
-                {
-                    svAccount.Svcaident = newCard.Caident;
-                    _context.Svaccounts.Update(svAccount);
-                }
-                // otherwise should be some exception that maximum count is exceeded, probably
+                
                 _context.Cards.Update(newCard);
+                
+                await UpdateCardHistory(vehicleId, newCard.Caident);
+                await SetCardActive(newCard.Caident);
             }
         }
         else
         {
-            newCard = new Card()
+            newCard = await _context.Cards.FirstOrDefaultAsync(x => x.Caveident == 0 && x.Catype == 0);
+            if (newCard == null)
             {
-                Caveident = vehicleId,
-                Cano = cardNumber,
-                Cano2 = cardNumber,
-                Catype = 0,
-                Cadate = DateTime.Now
-            };
-            _context.Cards.Add(newCard);
-            await _context.SaveChangesAsync();
-            
-            var cardHistory = new Cahistory()
-            {
-                Chdate = DateTime.Now,
-                Chveident = vehicleId,
-                Chcaident = newCard.Caident
-            };
-            _context.Cahistories.Add(cardHistory);
-
-            var svAccount = await _context.Svaccounts.FirstOrDefaultAsync(x => x.Svcaident == 0);
-            if (svAccount != null)
-            {
-                svAccount.Svcaident = newCard.Caident;
-                _context.Svaccounts.Update(svAccount);
+                throw new ArgumentException("No unassigned cards left");
             }
-            // otherwise should be some exception that maximum count is exceeded, probably
+
+            newCard.Cano = cardNumber;
+            newCard.Cano2 = cardNumber;
+            newCard.Caveident = vehicleId;
+            
+            _context.Cards.Update(newCard);
+
+            await UpdateCardHistory(vehicleId, newCard.Caident);
+            await SetCardActive(newCard.Caident);
         }
         await _context.SaveChangesAsync();
+    }
+    
+    private async Task UpdateCardHistory(long vehicleId, long cardId)
+    {
+        var cardHistory = new Cahistory()
+        {
+            Chdate = DateTime.Now,
+            Chveident = vehicleId,
+            Chcaident = cardId
+        };
+        await _context.Cahistories.AddAsync(cardHistory);
+    }
+
+    private async Task SetCardActive(long cardId)
+    {
+        var svAccount = await _context.Svaccounts.FirstOrDefaultAsync(x => x.Svcaident == 0);
+        if (svAccount != null)
+        {
+            svAccount.Svcaident = cardId;
+            _context.Svaccounts.Update(svAccount);
+        }
+        // otherwise should be some exception that maximum count is exceeded, probably
     }
     private static IConnector? CreateConnector(VehicleCategory category, string agrarwareId, long novotecId)
     {
