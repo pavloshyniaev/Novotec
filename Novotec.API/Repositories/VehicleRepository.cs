@@ -60,6 +60,9 @@ public class VehicleRepository : IVehicleRepository
         var vehiclesToDelete = await _context.Vehicles
             .Where(x => !novotecVehicleIds.Select(c => c.NovotecId).Contains(x.Veident))
             .ToListAsync();
+        
+        await DeleteVehicles(vehiclesToDelete, false);
+
         foreach (var vehicle in vehicles)
         {
             var vehicleNovotecId = novotecVehicleIds.FirstOrDefault(x => x.AgrarwareId == vehicle.Id)?.NovotecId;
@@ -167,7 +170,6 @@ public class VehicleRepository : IVehicleRepository
             }
         }
 
-        await DeleteVehicles(vehiclesToDelete, false);
         await _context.SaveChangesAsync();
     }
 

@@ -58,6 +58,8 @@ public class EmployeeRepository : IEmployeeRepository
             .Where(x => !novotecEmployeeIds.Select(c => c.NovotecId).Contains(x.Emident))
             .ToListAsync();
         
+        await DeleteEmployees(employeesToDelete, false);
+
         foreach (var employee in employees)
         {
             var novotecId = novotecEmployeeIds.FirstOrDefault(x => x.AgrarwareId == employee.PersonId)?.NovotecId;
@@ -165,9 +167,7 @@ public class EmployeeRepository : IEmployeeRepository
                 _context.Employees.Update(existingEmployee);
             }
         }
-
-        await DeleteEmployees(employeesToDelete, false);
-
+        
         await _context.SaveChangesAsync();
     }
     
