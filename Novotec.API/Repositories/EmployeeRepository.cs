@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Novotec.API.Dto;
 using Novotec.API.Interfaces;
@@ -17,38 +18,7 @@ public class EmployeeRepository : IEmployeeRepository
         _context = context;
         _connectorContext = connectorContext;
     }
-
-    private async Task SynchronizeIds(List<PersonDto> employees)
-    {
-        var personalNumbers = employees.Select(e => e.PersonalNumber);
-        var existingEmployees = await _context.Employees.Where(x => personalNumbers.Contains(x.Empersno)).ToListAsync();
-        foreach (var existingEmployee in existingEmployees)
-        {
-            var employee = employees.FirstOrDefault(x => x.PersonalNumber == existingEmployee.Empersno);
-            if (employee != null)
-            {
-                var existingConnection = await _connectorContext.Employees.FirstOrDefaultAsync(x => x.AgrarwareId == employee.PersonId);
-                if (existingConnection == null)
-                {
-                    var connectedEmployee = new EmployeeConnector()
-                    {
-                        AgrarwareId = employee.PersonId,
-                        NovotecId = existingEmployee.Emident
-                    };
-                    _connectorContext.Employees.Add(connectedEmployee);
-                }
-            }
-        }
-        await _connectorContext.SaveChangesAsync();
-    }
-
-    private async Task<List<EmployeeConnector>> GetNovotecIds(List<PersonDto> employees)
-    {
-        var employeeIdentifiers = employees.Select(x => x.PersonId);
-        var novotecEmployeeIds = await _connectorContext.Employees.Where(x => employeeIdentifiers.Contains(x.AgrarwareId)).ToListAsync();
-        
-        return novotecEmployeeIds;
-    }
+    
     public async Task SynchronizeEmployees(List<PersonDto> employees)
     {
         await SynchronizeIds(employees);
@@ -231,6 +201,37 @@ public class EmployeeRepository : IEmployeeRepository
         
         _context.Employees.RemoveRange(duplicateEmployees);
         await _context.SaveChangesAsync();
+    }
+    private async Task SynchronizeIds(List<PersonDto> employees)
+    {
+        var personalNumbers = employees.Select(e => e.PersonalNumber);
+        var existingEmployees = await _context.Employees.Where(x => personalNumbers.Contains(x.Empersno)).ToListAsync();
+        foreach (var existingEmployee in existingEmployees)
+        {
+            var employee = employees.FirstOrDefault(x => x.PersonalNumber == existingEmployee.Empersno);
+            if (employee != null)
+            {
+                var existingConnection = await _connectorContext.Employees.FirstOrDefaultAsync(x => x.AgrarwareId == employee.PersonId);
+                if (existingConnection == null)
+                {
+                    var connectedEmployee = new EmployeeConnector()
+                    {
+                        AgrarwareId = employee.PersonId,
+                        NovotecId = existingEmployee.Emident
+                    };
+                    _connectorContext.Employees.Add(connectedEmployee);
+                }
+            }
+        }
+        await _connectorContext.SaveChangesAsync();
+    }
+
+    private async Task<List<EmployeeConnector>> GetNovotecIds(List<PersonDto> employees)
+    {
+        var employeeIdentifiers = employees.Select(x => x.PersonId);
+        var novotecEmployeeIds = await _connectorContext.Employees.Where(x => employeeIdentifiers.Contains(x.AgrarwareId)).ToListAsync();
+        
+        return novotecEmployeeIds;
     }
     private async Task UnassignExistingCard(long employeeId, string newCardNumber)
     {

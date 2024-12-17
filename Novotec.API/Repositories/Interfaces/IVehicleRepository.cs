@@ -5,6 +5,6 @@ namespace Novotec.API.Interfaces;
 
 public interface IVehicleRepository
 {
-    Task AddOrUpdate(List<VehicleDto> vehicles);
+    Task SynchronizeVehicles(List<VehicleDto> vehicles);
     Task<List<VehicleDto>> GetVehicles();
 }

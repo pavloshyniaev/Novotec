@@ -17,42 +17,8 @@ public class VehicleRepository : IVehicleRepository
         _context = context;
         _connectorContext = connectorContext;
     }
-    private async Task SynchronizeIds(List<VehicleDto> vehicles)
-    {
-        var registrationNumbers = vehicles.Select(e => e.RegistrationNumber);
-        var existingVehicles = await _context.Vehicles.Where(x => registrationNumbers.Contains(x.Veintno)).ToListAsync();
-        foreach (var existingVehicle in existingVehicles)
-        {
-            var vehicle = vehicles.FirstOrDefault(x => x.RegistrationNumber == existingVehicle.Veintno);
-            if (vehicle != null)
-            {
-                var existingConnection = await ConnectorExists(vehicle.VehicleCategory, vehicle.Id);
-                if (existingConnection == null)
-                {
-                    var connectedVehicle = CreateConnector(vehicle.VehicleCategory, vehicle.Id, existingVehicle.Veident);
-                    if (connectedVehicle != null)
-                    {
-                        _connectorContext.Add(connectedVehicle);
-                    }
-                }
-            }
-        }
-        await _connectorContext.SaveChangesAsync();
-    }
-    private async Task<List<IConnector>> GetNovotecIds(List<VehicleDto> vehicles)
-    {
-        var allVehicleIds = new List<IConnector>();
-        var vehicleIdentifiers = vehicles.Select(x => x.Id);
-        var connectedVehicleIds = await _connectorContext.Vehicles.Where(x => vehicleIdentifiers.Contains(x.AgrarwareId)).ToListAsync();
-        var connectedTractorIds = await _connectorContext.Tractors.Where(x => vehicleIdentifiers.Contains(x.AgrarwareId)).ToListAsync();
-        var connectedGoodTransportIds = await _connectorContext.GoodsTransports.Where(x => vehicleIdentifiers.Contains(x.AgrarwareId)).ToListAsync();
-        allVehicleIds.AddRange(connectedVehicleIds);
-        allVehicleIds.AddRange(connectedTractorIds);
-        allVehicleIds.AddRange(connectedGoodTransportIds);
-
-        return allVehicleIds;
-    }
-    public async Task AddOrUpdate(List<VehicleDto> vehicles)
+    
+    public async Task SynchronizeVehicles(List<VehicleDto> vehicles)
     {
         await SynchronizeIds(vehicles);
         var novotecVehicleIds = await GetNovotecIds(vehicles);
@@ -195,6 +161,57 @@ public class VehicleRepository : IVehicleRepository
             _context.Vehicles.RemoveRange(vehicles);
         }
         await _context.SaveChangesAsync();
+    }
+    public async Task DeleteDuplicates()
+    {
+        var duplicateVehicles = await _context.Vehicles
+            .GroupBy(x => x.Vevehno)
+            .Where(g => g.Count() > 1)
+            .SelectMany(g => g)
+            .ToListAsync();
+        
+        foreach (var vehicle in duplicateVehicles)
+        {
+            await UnassignExistingCard(vehicle.Veident, "");
+        }
+        
+        _context.Vehicles.RemoveRange(duplicateVehicles);
+        await _context.SaveChangesAsync();
+    }
+    private async Task SynchronizeIds(List<VehicleDto> vehicles)
+    {
+        var registrationNumbers = vehicles.Select(e => e.RegistrationNumber);
+        var existingVehicles = await _context.Vehicles.Where(x => registrationNumbers.Contains(x.Veintno)).ToListAsync();
+        foreach (var existingVehicle in existingVehicles)
+        {
+            var vehicle = vehicles.FirstOrDefault(x => x.RegistrationNumber == existingVehicle.Veintno);
+            if (vehicle != null)
+            {
+                var existingConnection = await ConnectorExists(vehicle.VehicleCategory, vehicle.Id);
+                if (existingConnection == null)
+                {
+                    var connectedVehicle = CreateConnector(vehicle.VehicleCategory, vehicle.Id, existingVehicle.Veident);
+                    if (connectedVehicle != null)
+                    {
+                        _connectorContext.Add(connectedVehicle);
+                    }
+                }
+            }
+        }
+        await _connectorContext.SaveChangesAsync();
+    }
+    private async Task<List<IConnector>> GetNovotecIds(List<VehicleDto> vehicles)
+    {
+        var allVehicleIds = new List<IConnector>();
+        var vehicleIdentifiers = vehicles.Select(x => x.Id);
+        var connectedVehicleIds = await _connectorContext.Vehicles.Where(x => vehicleIdentifiers.Contains(x.AgrarwareId)).ToListAsync();
+        var connectedTractorIds = await _connectorContext.Tractors.Where(x => vehicleIdentifiers.Contains(x.AgrarwareId)).ToListAsync();
+        var connectedGoodTransportIds = await _connectorContext.GoodsTransports.Where(x => vehicleIdentifiers.Contains(x.AgrarwareId)).ToListAsync();
+        allVehicleIds.AddRange(connectedVehicleIds);
+        allVehicleIds.AddRange(connectedTractorIds);
+        allVehicleIds.AddRange(connectedGoodTransportIds);
+
+        return allVehicleIds;
     }
     private async Task UnassignExistingCard(long vehicleId, string newCardNumber)
     {

@@ -8,8 +8,18 @@ using Novotec.API.Middlewares;
 using Novotec.API.Repositories;
 using NovotecDB;
 using NovotecDB.Models;
+using Microsoft.Extensions.Hosting.WindowsServices;
+using Novotec.API.Services;
+
+var webApplicationOptions = new WebApplicationOptions
+{
+    Args = args,
+    ContentRootPath = WindowsServiceHelpers.IsWindowsService() ? AppContext.BaseDirectory : default
+};
 
 var builder = WebApplication.CreateBuilder(args);
+
+// builder.Host.UseWindowsService();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
@@ -33,6 +43,10 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddScoped<IApiService, ApiService>();
+
 builder.Services.AddDbContext<NovotecContext>(config =>
 {
     config.UseSqlServer(builder.Configuration.GetConnectionString("novotec"), options =>
@@ -51,6 +65,7 @@ app.UseMiddleware<ExceptionLoggingMiddleware>();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AgrarwareConnectorContext>();
+    // dbContext.Database.EnsureDeleted();
     dbContext.Database.Migrate();
 }
 

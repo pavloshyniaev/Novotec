@@ -9,19 +9,20 @@ namespace Novotec.API.Controllers;
 [Route("api/[controller]")]
 public class VehicleController : ControllerBase
 {
-    private readonly IVehicleRepository _vehicleRepository;
-    public VehicleController(IVehicleRepository vehicleRepository)
+    private readonly IVehicleService _vehicleService;
+
+    public VehicleController(IVehicleService vehicleService)
     {
-        _vehicleRepository = vehicleRepository;
+        _vehicleService = vehicleService;
     }
 
     [HttpPost]
     [Route("synchronize")]
-    public async Task<IActionResult> Synchronize([FromBody] List<VehicleDto> vehicles)
+    public async Task<IActionResult> Synchronize()
     {
         try
         {
-            await _vehicleRepository.AddOrUpdate(vehicles);
+            await _vehicleService.Synchronize();
             return Ok();
         }
         catch (Exception ex)
@@ -34,7 +35,7 @@ public class VehicleController : ControllerBase
     {
         try
         {
-            var vehicles = await _vehicleRepository.GetVehicles();
+            var vehicles = await _vehicleService.Get();
             return Ok(vehicles);
         }
         catch (Exception ex)

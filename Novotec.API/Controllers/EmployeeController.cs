@@ -9,19 +9,20 @@ namespace Novotec.API.Controllers;
 [Route("api/[controller]")]
 public class EmployeeController : ControllerBase
 {
-    private readonly IEmployeeRepository _employeeRepository;
-    public EmployeeController(IEmployeeRepository employeeRepository)
+    private readonly IEmployeeService _employeeService;
+
+    public EmployeeController(IEmployeeService employeeService)
     {
-        _employeeRepository = employeeRepository;
+        _employeeService = employeeService;
     }
 
     [HttpPost]
     [Route("synchronize")]
-    public async Task<IActionResult> Synchronize([FromBody] List<PersonDto> employees)
+    public async Task<IActionResult> Synchronize()
     {
         try
         {
-            await _employeeRepository.SynchronizeEmployees(employees);
+            await _employeeService.Synchronize();
             return Ok();
         }
         catch (Exception ex)
@@ -34,7 +35,7 @@ public class EmployeeController : ControllerBase
     {
         try
         {
-            var employees = await _employeeRepository.GetEmployees();
+            var employees = await _employeeService.Get();
             return Ok(employees);
         }
         catch (Exception ex)
