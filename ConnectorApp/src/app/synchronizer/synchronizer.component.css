@@ -1,0 +1,29 @@
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.record-counts {
+    margin-top: 20px;
+}
+
+.dropdown-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    align-items: center;
+}
+
+.dropdown-controls kendo-dropdownlist {
+    width: 150px !important;
+    /* Set width of dropdown */
+    font-size: 12px !important;
+    /* Set font size for smaller text */
+}
+
+.dropdown-controls kendo-label {
+    margin-right: 8px;
+    font-size: 12px !important;
+    /* Reduce label font size */
+}

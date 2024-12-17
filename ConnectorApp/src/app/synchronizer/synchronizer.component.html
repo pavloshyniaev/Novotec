@@ -1,0 +1,47 @@
+<div class="button-group">
+    <button kendoButton [primary]="true" (click)="updateEmployeeFull()">Update Employee (Full)</button>
+    <button kendoButton (click)="updateEmployeePartial()">Update Employee (Partial)</button>
+    <button kendoButton [primary]="true" (click)="updateVehicleFull()">Update Vehicle (Full)</button>
+    <button kendoButton (click)="updateVehiclePartial()">Update Vehicle (Partial)</button>
+</div>
+
+<div class="record-counts">
+    <h3>Record Counts</h3>
+    <div>
+        <kendo-label for="employeeCounts">Employee Counts</kendo-label>
+        <div id="employeeCounts">Updated: {{ updatedEmployeeCount }} | Deleted: {{ deletedEmployeeCount }}</div>
+    </div>
+
+    <div>
+        <kendo-label for="vehicleCounts">Vehicle Counts</kendo-label>
+        <div id="vehicleCounts">Updated: {{ updatedVehicleCount }} | Deleted: {{ deletedVehicleCount }}</div>
+    </div>
+</div>
+
+<div class="dropdown-controls">
+    <!-- Kendo Label for Entity Dropdown -->
+    <kendo-label for="entityTypeDropdown">Select Entity Type</kendo-label>
+    <kendo-dropdownlist 
+      id="entityTypeDropdown" 
+      [data]="entityOptions" 
+      [(ngModel)]="selectedEntityType"
+      [style.width.px]="150">
+    </kendo-dropdownlist>
+
+    <!-- Kendo Label for Record Type Dropdown -->
+    <kendo-label for="recordTypeDropdown">Select Record Type</kendo-label>
+    <kendo-dropdownlist 
+      id="recordTypeDropdown" 
+      [data]="recordTypeOptions" 
+      [(ngModel)]="selectedRecordType"
+      [style.width.px]="150">
+    </kendo-dropdownlist>
+</div>
+
+<h3>Data Table</h3>
+<kendo-grid [data]="currentGridData" [height]="400">
+    <kendo-grid-column field="id" title="ID"></kendo-grid-column>
+    <kendo-grid-column field="name" title="Employee Name" *ngIf="selectedEntityType === 'Employee'"></kendo-grid-column>
+    <kendo-grid-column field="status" title="Status"></kendo-grid-column>
+    <kendo-grid-column field="model" title="Vehicle Model" *ngIf="selectedEntityType === 'Vehicle'"></kendo-grid-column>
+</kendo-grid>
