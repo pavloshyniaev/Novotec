@@ -16,7 +16,7 @@ public class VehicleService : IVehicleService
 
     public async Task Synchronize()
     {
-        var vehicles = await _apiService.FetchData<List<VehicleDto>>("tank-station/vehicles");
+        var vehicles = await _apiService.FetchData<List<VehicleDto>>("/tank-station/vehicles");
         if (vehicles == null)
         {
             throw new ArgumentNullException("Vehicles not found");

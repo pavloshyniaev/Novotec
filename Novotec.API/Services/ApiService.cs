@@ -12,7 +12,7 @@ public class ApiService : IApiService
     public ApiService(IConfiguration configuration)
     {
         _httpClient = new HttpClient();
-        _baseUrl = configuration.GetValue<string>("Settings:BaseUrl") ?? throw new ArgumentNullException(_baseUrl);
+        _baseUrl = configuration.GetValue<string>("Settings:ApiUrl") ?? throw new ArgumentNullException(_baseUrl);
     }
 
     public async Task<T?> FetchData<T>(string endpoint)

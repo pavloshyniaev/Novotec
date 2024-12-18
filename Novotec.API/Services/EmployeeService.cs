@@ -16,7 +16,7 @@ public class EmployeeService : IEmployeeService
 
     public async Task Synchronize()
     {
-        var employees = await _apiService.FetchData<List<PersonDto>>("tank-station/persons");
+        var employees = await _apiService.FetchData<List<PersonDto>>("/tank-station/persons");
         if (employees == null)
         {
             throw new ArgumentNullException("Employees not found");
