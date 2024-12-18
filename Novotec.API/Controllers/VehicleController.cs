@@ -30,6 +30,20 @@ public class VehicleController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+    [HttpPost]
+    [Route("addOrUpdate")]
+    public async Task<IActionResult> AddOrUpdate(List<VehicleDto> vehicles)
+    {
+        try
+        {
+            await _vehicleService.AddOrUpdate(vehicles);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
     [HttpGet]
     public async Task<IActionResult> GetVehicles()
     {

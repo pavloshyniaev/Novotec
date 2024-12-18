@@ -23,12 +23,19 @@ public class EmployeeRepository : IEmployeeRepository
     {
         await SynchronizeIds(employees);
         var novotecEmployeeIds = await GetNovotecIds(employees);
-        var existingEmployees = await _context.Employees.Where(x => novotecEmployeeIds.Select(c => c.NovotecId).Contains(x.Emident)).ToListAsync();
         var employeesToDelete = await _context.Employees
             .Where(x => !novotecEmployeeIds.Select(c => c.NovotecId).Contains(x.Emident))
             .ToListAsync();
 
-        //await DeleteEmployees(employeesToDelete, false);
+        await DeleteEmployees(employeesToDelete, false);
+
+        await AddOrUpdate(employees);
+    }
+
+    public async Task AddOrUpdate(List<PersonDto> employees)
+    {
+        var novotecEmployeeIds = await GetNovotecIds(employees);
+        var existingEmployees = await _context.Employees.Where(x => novotecEmployeeIds.Select(c => c.NovotecId).Contains(x.Emident)).ToListAsync();
         await DeleteDuplicates();
 
         foreach (var employee in employees)
@@ -38,65 +45,16 @@ public class EmployeeRepository : IEmployeeRepository
             if (existingEmployee == null)
             {
                     //++ UPDATE [dbo].[CARDS] SET [CADATE]='20241202 17:17:40.567', [CAWHO]=40, [CAEMIDENT]=232 WHERE [CAIDENT]=459
-                // UPDATE [dbo].[SVACCOUNT] SET [SVCAIDENT]=459 WHERE [SVIDENT]=188 // probably takes the first unused entry (where cardId is not set in SVACCOUNT and assigns cardId to this entity
-                // UPDATE [dbo].[WSTATION] SET [WSDATE]='20241202 17:20:48.067' WHERE [WSIDENT]=34 // ignore for now
+                    // UPDATE [dbo].[SVACCOUNT] SET [SVCAIDENT]=459 WHERE [SVIDENT]=188 // probably takes the first unused entry (where cardId is not set in SVACCOUNT and assigns cardId to this entity
                     //++ INSERT INTO [dbo].[ADDRESS] ([ADIDENT], [ADWHO], [ADDATE], [ADTYPE], [ADLOC], [ADZIP], [ADCTRY], [ADSTR], [ADHP], [ADPB], [ADFNAME1], [ADLNAME1], [ADTITLE1], [ADGEN1], [ADTEL1], [ADTEL2], [ADFAX1], [ADEMAIL1], [ADFNAME2], [ADLNAME2], [ADTITLE2], [ADGEN2], [ADTEL3], [ADTEL4], [ADFAX2], [ADEMAIL2], [ADBANK1], [ADROUTNO1], [ADIBAN1], [ADACC1], [ADIBC1], [ADBANK2], [ADROUTNO2], [ADIBAN2], [ADACC2], [ADIBC2], [ADBANK3], [ADROUTNO3], [ADIBAN3], [ADACC3], [ADIBC3], [ADBANK4], [ADROUTNO4], [ADIBAN4], [ADACC4], [ADIBC4], [ADBANK5], [ADROUTNO5], [ADIBAN5], [ADACC5], [ADIBC5], [ADXXIDENT], [ADVATID], [ADTAXID]) 
                     // VALUES (468, 40, '20241202 17:17:00.000', 1, 'ort', 'plz', 'Deutschland', 'street', '', 'zip', 'Vorname', 'Name', '123', 0, '00112privattelefon', '050privatmobil', '050privatfax', 'privatGmail.com', '', '', '', 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 232, '', '')
-            //-- INSERT INTO [dbo].[ADDRESS] ([ADIDENT], [ADWHO], [ADDATE], [ADTYPE], [ADLOC], [ADZIP], [ADCTRY], [ADSTR], [ADHP], [ADPB], [ADFNAME1], [ADLNAME1], [ADTITLE1], [ADGEN1], [ADTEL1], [ADTEL2], [ADFAX1], [ADEMAIL1], [ADFNAME2], [ADLNAME2], [ADTITLE2], [ADGEN2], [ADTEL3], [ADTEL4], [ADFAX2], [ADEMAIL2], [ADBANK1], [ADROUTNO1], [ADIBAN1], [ADACC1], [ADIBC1], [ADBANK2], [ADROUTNO2], [ADIBAN2], [ADACC2], [ADIBC2], [ADBANK3], [ADROUTNO3], [ADIBAN3], [ADACC3], [ADIBC3], [ADBANK4], [ADROUTNO4], [ADIBAN4], [ADACC4], [ADIBC4], [ADBANK5], [ADROUTNO5], [ADIBAN5], [ADACC5], [ADIBC5], [ADXXIDENT], [ADVATID], [ADTAXID]) 
-            // VALUES (469, 40, '20241202 17:17:00.000', 7, '', '', '', '', '', '', '', '', '', 0, '1234567890com', '12345com', '123com', 'gmail.com', '', '', '', 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 232, '', '')
-                    // INSERT INTO [dbo].[CAHISTORY] ([CHIDENT], [CHDATE], [CHWHO], [CHCAIDENT], [CHLEIDENT], [CHCOIDENT], [CHVEIDENT], [CHEMIDENT], [CHFCIDENT]) 
+                     // INSERT INTO [dbo].[CAHISTORY] ([CHIDENT], [CHDATE], [CHWHO], [CHCAIDENT], [CHLEIDENT], [CHCOIDENT], [CHVEIDENT], [CHEMIDENT], [CHFCIDENT]) 
                     // VALUES (842, '20241202 17:17:40.000', 40, 459, 0, 0, 0, 232, 0)
                     // INSERT INTO [dbo].[SVACCDRIV] ([SAIDENT], [SAEMIDENT], [SAAUIDENT], [SAACCOUNT], [SADRVNO], [SAPIN]) 
                     // VALUES (2, 232, 1, 1, '1123355', 0)
                     //++ INSERT INTO [dbo].[EMPLOYEE] ([EMIDENT], [EMDATE], [EMWHO], [EMPERSNO], [EMDRIVNO], [EMSTART], [EMEND], [EMTYPE], [EMLEIDENT], [EMCOIDENT], [EMADIDENT], [EMMEMO], [EMSTATE], [EMADCOMP], [EMISCUST], [EMCOID], [EMCOCODE], [EMHO], [EMDIVISION], [EMDIVABBR], [EMGROUP]) 
                     // VALUES (232, '20241202 17:17:40.550', 40, '1245512', '1123355', '20241202 00:00:00.000', NULL, 0, 0, 0, 468, '', '', 469, 0, NULL, '', '', '', '', '')
-
-                var address = new Address()
-                {
-                    Adfname1 = employee.FirstName,
-                    Adlname1 = employee.LastName,
-                    Adctry = employee.Country,
-                    Adstr = employee.StreetName,
-                    Adzip = employee.ZipCode,
-                    Adloc = employee.City
-                };
-
-                _context.Addresses.Add(address);
-                await _context.SaveChangesAsync();
-                
-                var newEmployee = new Employee()
-                {
-                    Empersno = employee.PersonalNumber,
-                    Emstart = employee.ContractFrom,
-                    Emend = employee.ContractTo,
-                    Emadident = address.Adident,
-                    Emdate = DateTime.Now,
-                };
-                
-                _context.Employees.Add(newEmployee);
-                await _context.SaveChangesAsync();
-                
-                if (!string.IsNullOrEmpty(newEmployee.Emdrivno))
-                {
-                    var svAccDriv = new Svaccdriv()
-                    {
-                        Saemident = newEmployee.Emident,
-                        Saauident = 1,
-                        Sadrvno = newEmployee.Emdrivno
-                    };
-                    _context.Svaccdrivs.Add(svAccDriv);
-                }
-
-                await UnassignExistingCard(newEmployee.Emident, employee.ChipCode);
-                await AssignNewCard(newEmployee.Emident, employee.ChipCode);
-                
-                var connectedEmployee = new EmployeeConnector()
-                {
-                    AgrarwareId = employee.PersonId,
-                    NovotecId = newEmployee.Emident
-                };
-                _connectorContext.Employees.Add(connectedEmployee);
-                await _connectorContext.SaveChangesAsync();
+                await CreateEmployee(employee);
             }
             else
             {
@@ -114,28 +72,7 @@ public class EmployeeRepository : IEmployeeRepository
                 // VALUES (843, '20241204 13:15:51.000', 41, 306, 0, 0, 0, 0, 0)
                 // INSERT INTO [dbo].[CAHISTORY] ([CHIDENT], [CHDATE], [CHWHO], [CHCAIDENT], [CHLEIDENT], [CHCOIDENT], [CHVEIDENT], [CHEMIDENT], [CHFCIDENT]) 
                 // VALUES (844, '20241204 13:15:51.000', 41, 306, 0, 0, 0, 0, 0)
-                var existingAddress = await _context.Addresses.FirstOrDefaultAsync(x => x.Adident == existingEmployee.Emadident);
-                if (existingAddress != null)
-                {
-                    existingAddress.Adfname1 = employee.FirstName;
-                    existingAddress.Adlname1 = employee.LastName;
-                    existingAddress.Adctry = employee.Country;
-                    existingAddress.Adstr = employee.StreetName;
-                    existingAddress.Adzip = employee.ZipCode;
-                    existingAddress.Adloc = employee.City;
-                    _context.Addresses.Update(existingAddress);
-                }
-                
-                //probably check other cards, and see if there is any other cards bounded to this user, if so, delete employee id from them, as probably, one employee shouldn't have more than one card
-                await UnassignExistingCard(existingEmployee.Emident, employee.ChipCode);
-                await AssignNewCard(existingEmployee.Emident, employee.ChipCode);
-                
-                existingEmployee.Empersno = employee.PersonalNumber;
-                existingEmployee.Emstart = employee.ContractFrom;
-                existingEmployee.Emend = employee.ContractTo;
-                existingEmployee.Emdate = DateTime.Now;
-
-                _context.Employees.Update(existingEmployee);
+                await UpdateEmployee(employee, existingEmployee);
             }
         }
         
@@ -206,6 +143,82 @@ public class EmployeeRepository : IEmployeeRepository
         
         _context.Employees.RemoveRange(duplicateEmployees);
         await _context.SaveChangesAsync();
+    }
+
+    private async Task CreateEmployee(PersonDto employee)
+    {
+        var address = new Address()
+        {
+            Adfname1 = employee.FirstName,
+            Adlname1 = employee.LastName,
+            Adctry = employee.Country,
+            Adstr = employee.StreetName,
+            Adzip = employee.ZipCode,
+            Adloc = employee.City
+        };
+
+        _context.Addresses.Add(address);
+        await _context.SaveChangesAsync();
+                
+        var newEmployee = new Employee()
+        {
+            Empersno = employee.PersonalNumber,
+            Emstart = employee.ContractFrom,
+            Emend = employee.ContractTo,
+            Emadident = address.Adident,
+            Emdate = DateTime.Now,
+        };
+                
+        _context.Employees.Add(newEmployee);
+        await _context.SaveChangesAsync();
+                
+        if (!string.IsNullOrEmpty(newEmployee.Emdrivno))
+        {
+            var svAccDriv = new Svaccdriv()
+            {
+                Saemident = newEmployee.Emident,
+                Saauident = 1,
+                Sadrvno = newEmployee.Emdrivno
+            };
+            _context.Svaccdrivs.Add(svAccDriv);
+        }
+
+        await UnassignExistingCard(newEmployee.Emident, employee.ChipCode);
+        await AssignNewCard(newEmployee.Emident, employee.ChipCode);
+                
+        var connectedEmployee = new EmployeeConnector()
+        {
+            AgrarwareId = employee.PersonId,
+            NovotecId = newEmployee.Emident
+        };
+        _connectorContext.Employees.Add(connectedEmployee);
+        await _connectorContext.SaveChangesAsync();
+    }
+
+    private async Task UpdateEmployee(PersonDto employee, Employee existingEmployee)
+    {
+        var existingAddress = await _context.Addresses.FirstOrDefaultAsync(x => x.Adident == existingEmployee.Emadident);
+        if (existingAddress != null)
+        {
+            existingAddress.Adfname1 = employee.FirstName;
+            existingAddress.Adlname1 = employee.LastName;
+            existingAddress.Adctry = employee.Country;
+            existingAddress.Adstr = employee.StreetName;
+            existingAddress.Adzip = employee.ZipCode;
+            existingAddress.Adloc = employee.City;
+            _context.Addresses.Update(existingAddress);
+        }
+                
+        //probably check other cards, and see if there is any other cards bounded to this user, if so, delete employee id from them, as probably, one employee shouldn't have more than one card
+        await UnassignExistingCard(existingEmployee.Emident, employee.ChipCode);
+        await AssignNewCard(existingEmployee.Emident, employee.ChipCode);
+                
+        existingEmployee.Empersno = employee.PersonalNumber;
+        existingEmployee.Emstart = employee.ContractFrom;
+        existingEmployee.Emend = employee.ContractTo;
+        existingEmployee.Emdate = DateTime.Now;
+
+        _context.Employees.Update(existingEmployee);
     }
     private async Task SynchronizeIds(List<PersonDto> employees)
     {

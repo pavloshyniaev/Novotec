@@ -30,6 +30,20 @@ public class EmployeeController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+    [HttpPost]
+    [Route("addOrUpdate")]
+    public async Task<IActionResult> AddOrUpdate(List<PersonDto> employees)
+    {
+        try
+        {
+            await _employeeService.AddOrUpdate(employees);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
     [HttpGet]
     public async Task<IActionResult> GetEmployees()
     {

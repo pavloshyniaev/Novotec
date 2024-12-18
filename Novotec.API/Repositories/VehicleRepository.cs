@@ -22,21 +22,28 @@ public class VehicleRepository : IVehicleRepository
     {
         await SynchronizeIds(vehicles);
         var novotecVehicleIds = await GetNovotecIds(vehicles);
-        var existingVehicles = await _context.Vehicles.Where(x => novotecVehicleIds.Select(c => c.NovotecId).Contains(x.Veident)).ToListAsync(); 
         var vehiclesToDelete = await _context.Vehicles
             .Where(x => !novotecVehicleIds.Select(c => c.NovotecId).Contains(x.Veident))
             .ToListAsync();
 
-        //await DeleteVehicles(vehiclesToDelete, false);
+        await DeleteVehicles(vehiclesToDelete, false);
+        
+        await AddOrUpdate(vehicles);
+    }
+    
+    public async Task AddOrUpdate(List<VehicleDto> vehicles)
+    {
+        var novotecVehicleIds = await GetNovotecIds(vehicles);
+        var existingVehicles = await _context.Vehicles.Where(x => novotecVehicleIds.Select(c => c.NovotecId).Contains(x.Veident)).ToListAsync();
         await DeleteDuplicates();
 
         foreach (var vehicle in vehicles)
         {
-            var vehicleNovotecId = novotecVehicleIds.FirstOrDefault(x => x.AgrarwareId == vehicle.Id)?.NovotecId;
-            var existingVehicle = existingVehicles.FirstOrDefault(x => x.Veident == vehicleNovotecId);
+            var novotecId = novotecVehicleIds.FirstOrDefault(x => x.AgrarwareId == vehicle.Id)?.NovotecId;
+            var existingVehicle = existingVehicles.FirstOrDefault(x => x.Veident == novotecId);
             if (existingVehicle == null)
             {
-                // UPDATE [dbo].[CARDS] SET [CADATE]='20221108 12:35:56.000', [CAVEIDENT]=340 WHERE [CAIDENT]=185
+                    // UPDATE [dbo].[CARDS] SET [CADATE]='20221108 12:35:56.000', [CAVEIDENT]=340 WHERE [CAIDENT]=185
                 // UPDATE [dbo].[SVACCOUNT] SET [SVCAIDENT]=185 WHERE [SVIDENT]=188
                 // INSERT INTO [dbo].[VTECH] ([VTIDENT], [VTDATE], [VTWHO], [VTTANK], [VTNORM], [VTTYRESIZ1], [VTTYRESIZ2], [VTTYRESIZ3], [VTTYRESIZ4], [VTTYRESIZ5], [VTTYRESIZE], [VTSTEER1], [VTSTEER2], [VTSTEER3], [VTSTEER4], [VTSTEER5], [VTLIFT1], [VTLIFT2], [VTLIFT3], [VTLIFT4], [VTLIFT5], [VTTWIN1], [VTTWIN2], [VTTWIN3], [VTTWIN4], [VTTWIN5], [VTGVW], [VTSWL], [VTRET], [VTUNDA], [VTMOTOR], [VTMPOWER], [VTCYCLAP], [VTSEATS], [VTSTAND], [VTMEMO], [VTLOADAREA], [VTHOLD], [VTLOADH], [VTLOADW], [VTLOADL], [VTPOS], [VTNEG], [VTCO2], [VTDATEMAINT], [VTTANKVOLMINP], [VTTANKVOLMAXP], [VTTANKH2KG], [VTMINTEMP], [VTMAXTEMP], [VTMAXP], [VTMINP], [VTH2TYPE]) 
                 // VALUES (340, '20241203 09:09:46.487', 40, 40, 9.0, '', '', '', '', '', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 0, 0, 'Dienstag, 3. Dezember 2024 09:09', 0, 0, 0, 0, 0, 1.0, 1.0, 0, NULL, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -62,40 +69,7 @@ public class VehicleRepository : IVehicleRepository
                 //     VTNEG = 1.0,
                 //     VTCO2 = 1.0,
                 // };
-                var newVehicle = new Vehicle()
-                {
-                    Veintno = vehicle.RegistrationNumber,
-                    Vehhstart = vehicle.InitialCounter.GetValueOrDefault(),
-                    Vehours = vehicle.CurrentCounter.GetValueOrDefault(),
-                    Vetype = (byte)vehicle.VehicleCounterType,
-                    Vekmstart = vehicle.InitialKm.GetValueOrDefault(),
-                    Vemiles = vehicle.CurrentKm.GetValueOrDefault(),
-                    Veplate = vehicle.PlateNr,
-                    Vevehno = vehicle.VehicleIdNumber,
-                    Vedate = DateTime.Now,
-                    Vecat = Convert.ToInt32(vehicle.VehicleCategory),
-                };
-                
-                _context.Vehicles.Add(newVehicle);
-                await _context.SaveChangesAsync();
-                
-                var vtech = new Vtech()
-                {
-                    Vtident = newVehicle.Veident,
-                    Vtdate = DateTime.Now,
-                };
-                _context.Vteches.Add(vtech);
-                
-                await UnassignExistingCard(newVehicle.Veident, vehicle.ChipCode);
-                await AssignNewCard(newVehicle.Veident, vehicle.ChipCode);
-
-                var vehicleConnector = CreateConnector(vehicle.VehicleCategory, vehicle.Id, newVehicle.Veident);
-                if(vehicleConnector != null)
-                {
-                    _connectorContext.Add(vehicleConnector);
-                }
-
-                await _connectorContext.SaveChangesAsync();
+                await CreateVehicle(vehicle);
             }
             else
             {
@@ -114,29 +88,10 @@ public class VehicleRepository : IVehicleRepository
                 // INSERT INTO [dbo].[VREFATT] ([VRIDENT], [VRVCIDENT], [VRVEIDENT]) 
                 // VALUES (1, 1, 206)
 
-                existingVehicle.Veintno = vehicle.RegistrationNumber;
-                existingVehicle.Vehhstart = vehicle.InitialCounter.GetValueOrDefault();
-                existingVehicle.Vehours = vehicle.CurrentCounter.GetValueOrDefault();
-                existingVehicle.Vekmstart = vehicle.InitialKm.GetValueOrDefault();
-                existingVehicle.Vemiles = vehicle.CurrentKm.GetValueOrDefault();
-                existingVehicle.Vetype = (byte)vehicle.VehicleCounterType;
-                existingVehicle.Veplate = vehicle.PlateNr;
-                existingVehicle.Vevehno = vehicle.VehicleIdNumber;
-                existingVehicle.Vedate = DateTime.Now;
-                existingVehicle.Vecat = Convert.ToInt32(vehicle.VehicleCategory);
-                
-                await UnassignExistingCard(existingVehicle.Veident, vehicle.ChipCode);
-                await AssignNewCard(existingVehicle.Veident, vehicle.ChipCode);
-                
-                var vtech = await _context.Vteches.FirstOrDefaultAsync(x => x.Vtident == existingVehicle.Veident);
-                if (vtech != null)
-                {
-                    _context.Vteches.Update(vtech);
-                }
-                _context.Vehicles.Update(existingVehicle);
+                await UpdateVehicle(vehicle, existingVehicle);
             }
         }
-
+        
         await _context.SaveChangesAsync();
     }
 
@@ -182,6 +137,68 @@ public class VehicleRepository : IVehicleRepository
         
         _context.Vehicles.RemoveRange(duplicateVehicles);
         await _context.SaveChangesAsync();
+    }
+
+    private async Task CreateVehicle(VehicleDto vehicle)
+    {
+        var newVehicle = new Vehicle()
+        {
+            Veintno = vehicle.RegistrationNumber,
+            Vehhstart = vehicle.InitialCounter.GetValueOrDefault(),
+            Vehours = vehicle.CurrentCounter.GetValueOrDefault(),
+            Vetype = (byte)vehicle.VehicleCounterType,
+            Vekmstart = vehicle.InitialKm.GetValueOrDefault(),
+            Vemiles = vehicle.CurrentKm.GetValueOrDefault(),
+            Veplate = vehicle.PlateNr,
+            Vevehno = vehicle.VehicleIdNumber,
+            Vedate = DateTime.Now,
+            Vecat = Convert.ToInt32(vehicle.VehicleCategory),
+        };
+                
+        _context.Vehicles.Add(newVehicle);
+        await _context.SaveChangesAsync();
+                
+        var vtech = new Vtech()
+        {
+            Vtident = newVehicle.Veident,
+            Vtdate = DateTime.Now,
+        };
+        _context.Vteches.Add(vtech);
+                
+        await UnassignExistingCard(newVehicle.Veident, vehicle.ChipCode);
+        await AssignNewCard(newVehicle.Veident, vehicle.ChipCode);
+
+        var vehicleConnector = CreateConnector(vehicle.VehicleCategory, vehicle.Id, newVehicle.Veident);
+        if(vehicleConnector != null)
+        {
+            _connectorContext.Add(vehicleConnector);
+        }
+
+        await _connectorContext.SaveChangesAsync();
+    }
+
+    private async Task UpdateVehicle(VehicleDto vehicle, Vehicle existingVehicle)
+    {
+        existingVehicle.Veintno = vehicle.RegistrationNumber;
+        existingVehicle.Vehhstart = vehicle.InitialCounter.GetValueOrDefault();
+        existingVehicle.Vehours = vehicle.CurrentCounter.GetValueOrDefault();
+        existingVehicle.Vekmstart = vehicle.InitialKm.GetValueOrDefault();
+        existingVehicle.Vemiles = vehicle.CurrentKm.GetValueOrDefault();
+        existingVehicle.Vetype = (byte)vehicle.VehicleCounterType;
+        existingVehicle.Veplate = vehicle.PlateNr;
+        existingVehicle.Vevehno = vehicle.VehicleIdNumber;
+        existingVehicle.Vedate = DateTime.Now;
+        existingVehicle.Vecat = Convert.ToInt32(vehicle.VehicleCategory);
+                
+        await UnassignExistingCard(existingVehicle.Veident, vehicle.ChipCode);
+        await AssignNewCard(existingVehicle.Veident, vehicle.ChipCode);
+                
+        var vtech = await _context.Vteches.FirstOrDefaultAsync(x => x.Vtident == existingVehicle.Veident);
+        if (vtech != null)
+        {
+            _context.Vteches.Update(vtech);
+        }
+        _context.Vehicles.Update(existingVehicle);
     }
     private async Task SynchronizeIds(List<VehicleDto> vehicles)
     {

@@ -7,7 +7,6 @@ public class VehicleService : IVehicleService
 {
     private readonly IVehicleRepository _vehicleRepository;
     private readonly IApiService _apiService;
-    private readonly string _baseUrl = "https://localhost:63504/";
 
     public VehicleService(IVehicleRepository vehicleRepository, IApiService apiService)
     {
@@ -17,7 +16,11 @@ public class VehicleService : IVehicleService
 
     public async Task Synchronize()
     {
-        var vehicles = await _apiService.FetchData<VehicleDto>(_baseUrl + "tank-station/vehicles");
+        var vehicles = await _apiService.FetchData<List<VehicleDto>>("tank-station/vehicles");
+        if (vehicles == null)
+        {
+            throw new ArgumentNullException("Vehicles not found");
+        }
         await _vehicleRepository.SynchronizeVehicles(vehicles);
     }
 

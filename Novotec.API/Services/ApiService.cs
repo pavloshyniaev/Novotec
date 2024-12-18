@@ -7,28 +7,30 @@ using Novotec.API.Interfaces;
 public class ApiService : IApiService
 {
     private readonly HttpClient _httpClient;
+    private readonly string _baseUrl;
 
-    public ApiService()
+    public ApiService(IConfiguration configuration)
     {
         _httpClient = new HttpClient();
+        _baseUrl = configuration.GetValue<string>("Settings:BaseUrl") ?? throw new ArgumentNullException(_baseUrl);
     }
 
-    public async Task<List<T>> FetchData<T>(string endpoint)
+    public async Task<T?> FetchData<T>(string endpoint)
     {
         try
         {
-            using var response = await _httpClient.GetAsync(endpoint);
+            using var response = await _httpClient.GetAsync(_baseUrl + endpoint);
 
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
 
-            var data = JsonSerializer.Deserialize<List<T>>(content, new JsonSerializerOptions
+            var data = JsonSerializer.Deserialize<T>(content, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
 
-            return data ?? new List<T>();
+            return data;
         }
         catch (Exception ex)
         {
