@@ -27,8 +27,9 @@ public class EmployeeRepository : IEmployeeRepository
         var employeesToDelete = await _context.Employees
             .Where(x => !novotecEmployeeIds.Select(c => c.NovotecId).Contains(x.Emident))
             .ToListAsync();
-        
-        await DeleteEmployees(employeesToDelete, false);
+
+        //await DeleteEmployees(employeesToDelete, false);
+        await DeleteDuplicates();
 
         foreach (var employee in employees)
         {
@@ -188,12 +189,16 @@ public class EmployeeRepository : IEmployeeRepository
     }
     public async Task DeleteDuplicates()
     {
-        var duplicateEmployees = await _context.Employees
+        var duplicateEmployeeIds = await _context.Employees
             .GroupBy(x => x.Empersno)
             .Where(g => g.Count() > 1)
-            .SelectMany(g => g)
+            .Select(g => g.Key)
             .ToListAsync();
-        
+
+        var duplicateEmployees = await _context.Employees
+            .Where(e => duplicateEmployeeIds.Contains(e.Empersno))
+            .ToListAsync();
+
         foreach (var employee in duplicateEmployees)
         {
             await UnassignExistingCard(employee.Emident, "");

@@ -28,6 +28,6 @@ public class PersonDto
         LastName = address?.Adlname1 ?? "";
         ContractFrom = employee.Emstart;
         ContractTo = employee.Emend;
-        ChipCode = card.Cano ?? "";
+        ChipCode = card?.Cano ?? "";
     }
 }

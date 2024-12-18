@@ -7,6 +7,7 @@ public class VehicleService : IVehicleService
 {
     private readonly IVehicleRepository _vehicleRepository;
     private readonly IApiService _apiService;
+    private readonly string _baseUrl = "https://localhost:63504/";
 
     public VehicleService(IVehicleRepository vehicleRepository, IApiService apiService)
     {
@@ -16,7 +17,7 @@ public class VehicleService : IVehicleService
 
     public async Task Synchronize()
     {
-        var vehicles = await _apiService.FetchData<VehicleDto>("localhost/api/tankStation/vehicles");
+        var vehicles = await _apiService.FetchData<VehicleDto>(_baseUrl + "tank-station/vehicles");
         await _vehicleRepository.SynchronizeVehicles(vehicles);
     }
 

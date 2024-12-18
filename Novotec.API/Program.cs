@@ -65,7 +65,7 @@ app.UseMiddleware<ExceptionLoggingMiddleware>();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AgrarwareConnectorContext>();
-    // dbContext.Database.EnsureDeleted();
+    dbContext.Database.EnsureDeleted();
     dbContext.Database.Migrate();
 }
 

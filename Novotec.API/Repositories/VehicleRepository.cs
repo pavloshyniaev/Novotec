@@ -26,8 +26,9 @@ public class VehicleRepository : IVehicleRepository
         var vehiclesToDelete = await _context.Vehicles
             .Where(x => !novotecVehicleIds.Select(c => c.NovotecId).Contains(x.Veident))
             .ToListAsync();
-        
-        await DeleteVehicles(vehiclesToDelete, false);
+
+        //await DeleteVehicles(vehiclesToDelete, false);
+        await DeleteDuplicates();
 
         foreach (var vehicle in vehicles)
         {
@@ -164,12 +165,16 @@ public class VehicleRepository : IVehicleRepository
     }
     public async Task DeleteDuplicates()
     {
-        var duplicateVehicles = await _context.Vehicles
+        var duplicateVehicleIds = await _context.Vehicles
             .GroupBy(x => x.Vevehno)
             .Where(g => g.Count() > 1)
-            .SelectMany(g => g)
+            .Select(g => g.Key)
             .ToListAsync();
-        
+
+        var duplicateVehicles = await _context.Vehicles
+            .Where(e => duplicateVehicleIds.Contains(e.Vevehno))
+            .ToListAsync();
+
         foreach (var vehicle in duplicateVehicles)
         {
             await UnassignExistingCard(vehicle.Veident, "");

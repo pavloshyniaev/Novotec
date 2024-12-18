@@ -7,6 +7,7 @@ public class EmployeeService : IEmployeeService
 {
     private readonly IEmployeeRepository _employeeRepository;
     private readonly IApiService _apiService;
+    private readonly string _baseUrl = "https://localhost:63504/";
 
     public EmployeeService(IEmployeeRepository employeeRepository, IApiService apiService)
     {
@@ -16,7 +17,7 @@ public class EmployeeService : IEmployeeService
 
     public async Task Synchronize()
     {
-        var employees = await _apiService.FetchData <PersonDto>("localhost/api/tankStation/employees");
+        var employees = await _apiService.FetchData <PersonDto>(_baseUrl + "tank-station/persons");
         await _employeeRepository.SynchronizeEmployees(employees);
     }
 
