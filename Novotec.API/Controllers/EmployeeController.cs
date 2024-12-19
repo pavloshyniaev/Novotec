@@ -22,8 +22,8 @@ public class EmployeeController : ControllerBase
     {
         try
         {
-            await _employeeService.Synchronize();
-            return Ok();
+            var synchronizedEmployeesLists = await _employeeService.Synchronize();
+            return Ok(synchronizedEmployeesLists);
         }
         catch (Exception ex)
         {

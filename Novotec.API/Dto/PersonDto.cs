@@ -26,6 +26,10 @@ public class PersonDto
         PersonId = (int)employee.Emident;
         FirstName = address?.Adfname1 ?? "";
         LastName = address?.Adlname1 ?? "";
+        ZipCode = address?.Adzip ?? "";
+        StreetName = address?.Adstr ?? "";
+        Country = address?.Adctry ?? "";
+        City = address?.Adloc ?? "";
         ContractFrom = employee.Emstart;
         ContractTo = employee.Emend;
         ChipCode = card?.Cano ?? "";

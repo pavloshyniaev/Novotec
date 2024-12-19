@@ -19,23 +19,27 @@ public class EmployeeRepository : IEmployeeRepository
         _connectorContext = connectorContext;
     }
     
-    public async Task SynchronizeEmployees(List<PersonDto> employees)
+    public async Task<SynchronizedEmployeesDto> SynchronizeEmployees(List<PersonDto> employees)
     {
         await SynchronizeIds(employees);
+        var result = await AddOrUpdate(employees);
+
         var novotecEmployeeIds = await GetNovotecIds(employees);
         var employeesToDelete = await _context.Employees
             .Where(x => !novotecEmployeeIds.Select(c => c.NovotecId).Contains(x.Emident))
             .ToListAsync();
 
-        await DeleteEmployees(employeesToDelete, false);
-
-        await AddOrUpdate(employees);
+        var deletedEmployees = await DeleteEmployees(employeesToDelete, false);
+        
+        return new SynchronizedEmployeesDto(result.Item1, result.Item2, deletedEmployees);
     }
 
-    public async Task AddOrUpdate(List<PersonDto> employees)
+    public async Task<(List<PersonDto>, List<PersonDto>)> AddOrUpdate(List<PersonDto> employees)
     {
         var novotecEmployeeIds = await GetNovotecIds(employees);
         var existingEmployees = await _context.Employees.Where(x => novotecEmployeeIds.Select(c => c.NovotecId).Contains(x.Emident)).ToListAsync();
+        var addedEmployees = employees.Where(a => !existingEmployees.Select(b => b.Empersno).Contains(a.PersonalNumber)).ToList();
+        var updatedEmployees = employees.Where(a => !addedEmployees.Select(b => b.PersonalNumber).Contains(a.PersonalNumber)).ToList();
         await DeleteDuplicates();
 
         foreach (var employee in employees)
@@ -77,16 +81,21 @@ public class EmployeeRepository : IEmployeeRepository
         }
         
         await _context.SaveChangesAsync();
+        return (addedEmployees, updatedEmployees);
     }
     
-    public async Task<List<PersonDto>> GetEmployees()
+    public async Task<List<PersonDto>> GetEmployees(List<long>? employeeIds = null)
     {
         var persons = new List<PersonDto>();
         var currentDateTime = DateTime.Now;
         var employees = await _context.Employees.Where(x => x.Emend == null || x.Emend.Value > currentDateTime).ToListAsync();
-        var employeeIds = employees.Select(x => x.Emident);
+        if (employeeIds != null)
+        {
+            employees = employees.Where(x => employeeIds.Contains(x.Emident)).ToList();
+        }
+        var selectedEmployeeIds = employees.Select(x => x.Emident).ToList();
         var addressIds = employees.Select(x => x.Emadident);
-        var cards = await _context.Cards.Where(x => employeeIds.Contains(x.Caemident)).ToListAsync();
+        var cards = await _context.Cards.Where(x => selectedEmployeeIds.Contains(x.Caemident)).ToListAsync();
         var addresses = await _context.Addresses.Where(x => addressIds.Contains(x.Adident)).ToListAsync();
         foreach (var employee in employees)
         {
@@ -97,7 +106,7 @@ public class EmployeeRepository : IEmployeeRepository
         return persons;
     }
 
-    public async Task DeleteEmployees(List<Employee> employees, bool forceDelete)
+    private async Task<List<PersonDto>> DeleteEmployees(List<Employee> employees, bool forceDelete)
     {
         // UPDATE [dbo].[EMPLOYEE] SET [EMDATE]='20241204 12:24:46.000', [EMWHO]=40 WHERE [EMIDENT]=146
         // UPDATE [dbo].[CARDS] SET [CADATE]='20241204 12:24:46.987', [CAEMIDENT]=0 WHERE [CAIDENT]=358
@@ -108,6 +117,7 @@ public class EmployeeRepository : IEmployeeRepository
         // INSERT INTO [dbo].[CAHISTORY] ([CHIDENT], [CHDATE], [CHWHO], [CHCAIDENT], [CHLEIDENT], [CHCOIDENT], [CHVEIDENT], [CHEMIDENT], [CHFCIDENT]) 
         // VALUES (842, '20241204 12:24:46.000', 41, 358, 0, 0, 0, 0, 0)
 
+        var employeesToDelete = await GetEmployees(employees.Select(x => x.Emident).ToList());
         foreach (var employee in employees)
         {
             await UnassignExistingCard(employee.Emident, "");
@@ -123,6 +133,8 @@ public class EmployeeRepository : IEmployeeRepository
             _context.Employees.RemoveRange(employees);
         }
         await _context.SaveChangesAsync();
+        
+        return employeesToDelete;
     }
     public async Task DeleteDuplicates()
     {

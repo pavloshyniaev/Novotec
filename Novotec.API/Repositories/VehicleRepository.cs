@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Novotec.API.Dto;
 using Novotec.API.Interfaces;
 using NovotecDB;
@@ -18,23 +19,28 @@ public class VehicleRepository : IVehicleRepository
         _connectorContext = connectorContext;
     }
     
-    public async Task SynchronizeVehicles(List<VehicleDto> vehicles)
+    public async Task<SynchronizedVehiclesDto> SynchronizeVehicles(List<VehicleDto> vehicles)
     {
         await SynchronizeIds(vehicles);
+        
+        var synchronizedVehicles = await AddOrUpdate(vehicles);
+        
         var novotecVehicleIds = await GetNovotecIds(vehicles);
         var vehiclesToDelete = await _context.Vehicles
             .Where(x => !novotecVehicleIds.Select(c => c.NovotecId).Contains(x.Veident))
             .ToListAsync();
 
-        await DeleteVehicles(vehiclesToDelete, false);
+        var deletedVehicles = await DeleteVehicles(vehiclesToDelete, false);
         
-        await AddOrUpdate(vehicles);
+        return new SynchronizedVehiclesDto(synchronizedVehicles.Item1, synchronizedVehicles.Item2, deletedVehicles);
     }
     
-    public async Task AddOrUpdate(List<VehicleDto> vehicles)
+    public async Task<(List<VehicleDto>, List<VehicleDto>)> AddOrUpdate(List<VehicleDto> vehicles)
     {
         var novotecVehicleIds = await GetNovotecIds(vehicles);
         var existingVehicles = await _context.Vehicles.Where(x => novotecVehicleIds.Select(c => c.NovotecId).Contains(x.Veident)).ToListAsync();
+        var addedVehicles = vehicles.Where(a => !existingVehicles.Select(b => b.Veintno).Contains(a.RegistrationNumber)).ToList();
+        var updatedVehicles = vehicles.Where(a => !addedVehicles.Select(b => b.RegistrationNumber).Contains(a.RegistrationNumber)).ToList();
         await DeleteDuplicates();
 
         foreach (var vehicle in vehicles)
@@ -93,15 +99,22 @@ public class VehicleRepository : IVehicleRepository
         }
         
         await _context.SaveChangesAsync();
+        return (addedVehicles, updatedVehicles);
     }
 
-    public async Task<List<VehicleDto>> GetVehicles()
+    public async Task<List<VehicleDto>> GetVehicles(List<long>? vehicleIds = null)
     {
         var currentTime = DateTime.Now;
-        return await _context.Vehicles.Where(x => x.Veend < currentTime).Select(x => new VehicleDto(x)).ToListAsync();
+        var vehicles = await _context.Vehicles.Where(x => x.Veend == null || x.Veend > currentTime).ToListAsync();
+        if (vehicleIds != null)
+        {
+            vehicles = vehicles.Where(x => vehicleIds.Contains(x.Veident)).ToList();
+        }
+        return vehicles.Select(x => new VehicleDto(x)).ToList();
     }
-    public async Task DeleteVehicles(List<Vehicle> vehicles, bool forceDelete)
+    private async Task<List<VehicleDto>> DeleteVehicles(List<Vehicle> vehicles, bool forceDelete)
     {
+        var vehiclesToDelete = await GetVehicles(vehicles.Select(x => x.Veident).ToList());
         foreach (var vehicle in vehicles)
         {
             await UnassignExistingCard(vehicle.Veident, "");
@@ -117,17 +130,18 @@ public class VehicleRepository : IVehicleRepository
             _context.Vehicles.RemoveRange(vehicles);
         }
         await _context.SaveChangesAsync();
+        return vehiclesToDelete;
     }
     public async Task DeleteDuplicates()
     {
         var duplicateVehicleIds = await _context.Vehicles
-            .GroupBy(x => x.Vevehno)
+            .GroupBy(x => x.Veintno)
             .Where(g => g.Count() > 1)
             .Select(g => g.Key)
             .ToListAsync();
 
         var duplicateVehicles = await _context.Vehicles
-            .Where(e => duplicateVehicleIds.Contains(e.Vevehno))
+            .Where(e => duplicateVehicleIds.Contains(e.Veintno))
             .ToListAsync();
 
         foreach (var vehicle in duplicateVehicles)
@@ -277,7 +291,7 @@ public class VehicleRepository : IVehicleRepository
                 await SetCardActive(newCard.Caident);
             }
         }
-        else
+        else if(!cardNumber.IsNullOrEmpty())
         {
             newCard = await _context.Cards.FirstOrDefaultAsync(x => x.Caveident == 0 && x.Catype == 0);
             if (newCard == null)

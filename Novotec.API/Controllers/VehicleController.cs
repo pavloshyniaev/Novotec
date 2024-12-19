@@ -22,8 +22,8 @@ public class VehicleController : ControllerBase
     {
         try
         {
-            await _vehicleService.Synchronize();
-            return Ok();
+            var synchronizedVehicles = await _vehicleService.Synchronize();
+            return Ok(synchronizedVehicles);
         }
         catch (Exception ex)
         {
@@ -36,8 +36,8 @@ public class VehicleController : ControllerBase
     {
         try
         {
-            await _vehicleService.AddOrUpdate(vehicles);
-            return Ok();
+            var synchronizedVehicles = await _vehicleService.AddOrUpdate(vehicles);
+            return Ok(synchronizedVehicles);
         }
         catch (Exception ex)
         {
