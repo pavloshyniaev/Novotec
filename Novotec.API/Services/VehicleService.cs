@@ -26,7 +26,7 @@ public class VehicleService : IVehicleService
 
     public async Task<SynchronizedVehiclesDto> AddOrUpdate(List<VehicleDto> vehicles)
     {
-        var synchronizedVehicles = await _vehicleRepository.AddOrUpdate(vehicles);
+        var synchronizedVehicles = await _vehicleRepository.AddOrUpdate(vehicles, true);
         return new SynchronizedVehiclesDto(synchronizedVehicles.Item1, synchronizedVehicles.Item2, new List<VehicleDto>());
     }
 

@@ -35,9 +35,9 @@ public class VehicleDto
         RegistrationNumber = vehicle.Veintno;
         VehicleIdNumber = vehicle.Vevehno;
         InCompanySince = vehicle.Vestart;
-        InitialKm = vehicle.Vemiles;
-        CurrentKm = vehicle.Vekmstart;
-        InitialCounter = vehicle.Vehours;
-        CurrentCounter = vehicle.Vehhstart;
+        CurrentKm = vehicle.Vemiles;
+        InitialKm = vehicle.Vekmstart;
+        CurrentCounter = vehicle.Vehours;
+        InitialCounter = vehicle.Vehhstart;
     }
 }

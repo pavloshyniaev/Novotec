@@ -35,8 +35,12 @@ public class VehicleRepository : IVehicleRepository
         return new SynchronizedVehiclesDto(synchronizedVehicles.Item1, synchronizedVehicles.Item2, deletedVehicles);
     }
     
-    public async Task<(List<VehicleDto>, List<VehicleDto>)> AddOrUpdate(List<VehicleDto> vehicles)
+    public async Task<(List<VehicleDto>, List<VehicleDto>)> AddOrUpdate(List<VehicleDto> vehicles, bool externalCall = false)
     {
+        if (externalCall)
+        {
+            await SynchronizeIds(vehicles);
+        }
         var novotecVehicleIds = await GetNovotecIds(vehicles);
         var existingVehicles = await _context.Vehicles.Where(x => novotecVehicleIds.Select(c => c.NovotecId).Contains(x.Veident)).ToListAsync();
         var addedVehicles = vehicles.Where(a => !existingVehicles.Select(b => b.Veintno).Contains(a.RegistrationNumber)).ToList();
@@ -182,10 +186,14 @@ public class VehicleRepository : IVehicleRepository
         await UnassignExistingCard(newVehicle.Veident, vehicle.ChipCode);
         await AssignNewCard(newVehicle.Veident, vehicle.ChipCode);
 
-        var vehicleConnector = CreateConnector(vehicle.VehicleCategory, vehicle.Id, newVehicle.Veident);
-        if(vehicleConnector != null)
+        var existingConnection = await ConnectorExists(vehicle.VehicleCategory, vehicle.Id);
+        if (existingConnection == null)
         {
-            _connectorContext.Add(vehicleConnector);
+            var connectedVehicle = CreateConnector(vehicle.VehicleCategory, vehicle.Id, newVehicle.Veident);
+            if (connectedVehicle != null)
+            {
+                _connectorContext.Add(connectedVehicle);
+            }
         }
 
         await _connectorContext.SaveChangesAsync();
