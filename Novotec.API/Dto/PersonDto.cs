@@ -20,10 +20,10 @@ public class PersonDto
     {
         
     }
-    public PersonDto(Employee employee, Address? address, Card? card)
+    public PersonDto(Employee employee, Address? address, Card? card, int? personId)
     {
         PersonalNumber = employee.Empersno;
-        PersonId = (int)employee.Emident;
+        PersonId = personId ?? 0;
         FirstName = address?.Adfname1 ?? "";
         LastName = address?.Adlname1 ?? "";
         ZipCode = address?.Adzip ?? "";

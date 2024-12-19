@@ -109,7 +109,8 @@ public class EmployeeRepository : IEmployeeRepository
         {
             var card = cards.FirstOrDefault(x => x.Caemident == employee.Emident);
             var address = addresses.FirstOrDefault(x => x.Adident == employee.Emadident);
-            persons.Add(new PersonDto(employee, address, card));
+            var personId = _connectorContext.Employees.FirstOrDefault(x => x.NovotecId == employee.Emident)?.AgrarwareId;
+            persons.Add(new PersonDto(employee, address, card, personId));
         }
         return persons;
     }

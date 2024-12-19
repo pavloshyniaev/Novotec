@@ -112,12 +112,20 @@ public class VehicleRepository : IVehicleRepository
     public async Task<List<VehicleDto>> GetVehicles(List<long>? vehicleIds = null)
     {
         var currentTime = DateTime.Now;
+        var result = new List<VehicleDto>();
         var vehicles = await _context.Vehicles.Where(x => x.Veend == null || x.Veend > currentTime).ToListAsync();
         if (vehicleIds != null)
         {
             vehicles = vehicles.Where(x => vehicleIds.Contains(x.Veident)).ToList();
         }
-        return vehicles.Select(x => new VehicleDto(x)).ToList();
+
+        foreach (var vehicle in vehicles)
+        {
+            var vehicleConnector = await ConnectorExists((VehicleCategory)vehicle.Vecat, null, vehicle.Veident);
+            result.Add(new VehicleDto(vehicle, vehicleConnector?.AgrarwareId));
+        }
+
+        return result;
     }
     private async Task<List<VehicleDto>> DeleteVehicles(List<Vehicle> vehicles, bool forceDelete)
     {
@@ -189,7 +197,7 @@ public class VehicleRepository : IVehicleRepository
         await UnassignExistingCard(newVehicle.Veident, vehicle.ChipCode);
         await AssignNewCard(newVehicle.Veident, vehicle.ChipCode);
 
-        var existingConnection = await ConnectorExists(vehicle.VehicleCategory, vehicle.Id);
+        var existingConnection = await ConnectorExists(vehicle.VehicleCategory, vehicle.Id, null);
         if (existingConnection == null)
         {
             var connectedVehicle = CreateConnector(vehicle.VehicleCategory, vehicle.Id, newVehicle.Veident);
@@ -234,7 +242,7 @@ public class VehicleRepository : IVehicleRepository
             var vehicle = vehicles.FirstOrDefault(x => x.RegistrationNumber == existingVehicle.Veintno);
             if (vehicle != null)
             {
-                var existingConnection = await ConnectorExists(vehicle.VehicleCategory, vehicle.Id);
+                var existingConnection = await ConnectorExists(vehicle.VehicleCategory, vehicle.Id, null);
                 if (existingConnection == null)
                 {
                     var connectedVehicle = CreateConnector(vehicle.VehicleCategory, vehicle.Id, existingVehicle.Veident);
@@ -365,19 +373,39 @@ public class VehicleRepository : IVehicleRepository
             _ => null
         };
     }
-    private async Task<IConnector?> ConnectorExists(VehicleCategory category, string agrarwareId)
+    private async Task<IConnector?> ConnectorExists(VehicleCategory category, string? agrarwareId, long? novotecId)
     {
         switch (category)
         {
             case VehicleCategory.Normal:
-                return await _connectorContext.Vehicles.FirstOrDefaultAsync(x => x.AgrarwareId == agrarwareId);
+                if (agrarwareId != null)
+                {
+                    return await _connectorContext.Vehicles.FirstOrDefaultAsync(x => x.AgrarwareId == agrarwareId);
+                }
+                else
+                {
+                    return await _connectorContext.Vehicles.FirstOrDefaultAsync(x => x.NovotecId == novotecId);
+                }
 
             case VehicleCategory.Tractor:
-                return await _connectorContext.Tractors.FirstOrDefaultAsync(x => x.AgrarwareId == agrarwareId);
+                if (agrarwareId != null)
+                {
+                    return await _connectorContext.Tractors.FirstOrDefaultAsync(x => x.AgrarwareId == agrarwareId);
+                }
+                else
+                {
+                    return await _connectorContext.Tractors.FirstOrDefaultAsync(x => x.NovotecId == novotecId);
+                }
 
             case VehicleCategory.GoodsTransport:
-                return await _connectorContext.GoodsTransports.FirstOrDefaultAsync(x => x.AgrarwareId == agrarwareId);
-
+                if (agrarwareId != null)
+                {
+                    return await _connectorContext.GoodsTransports.FirstOrDefaultAsync(x => x.AgrarwareId == agrarwareId);
+                }
+                else
+                {
+                    return await _connectorContext.GoodsTransports.FirstOrDefaultAsync(x => x.NovotecId == novotecId);
+                }
             default:
                 throw new InvalidOperationException($"Unknown category: {category}");
         }

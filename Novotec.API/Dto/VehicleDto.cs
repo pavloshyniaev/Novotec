@@ -27,9 +27,9 @@ public class VehicleDto
         
     }
 
-    public VehicleDto(Vehicle vehicle)
+    public VehicleDto(Vehicle vehicle, string? vehicleId)
     {
-        Id = vehicle.Veident.ToString();
+        Id = vehicleId ?? "";
         VehicleCategory = (VehicleCategory)vehicle.Vecat;
         PlateNr = vehicle.Veplate;
         RegistrationNumber = vehicle.Veintno;
