@@ -26,7 +26,7 @@ public class EmployeeService : IEmployeeService
 
     public async Task<SynchronizedEmployeesDto> AddOrUpdate(List<PersonDto> employees)
     {
-        var synchronizedEmployees = await _employeeRepository.AddOrUpdate(employees);
+        var synchronizedEmployees = await _employeeRepository.AddOrUpdate(employees, true);
         return new SynchronizedEmployeesDto(synchronizedEmployees.Item1, synchronizedEmployees.Item2, new List<PersonDto>());
     }
 

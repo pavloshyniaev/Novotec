@@ -34,8 +34,12 @@ public class EmployeeRepository : IEmployeeRepository
         return new SynchronizedEmployeesDto(result.Item1, result.Item2, deletedEmployees);
     }
 
-    public async Task<(List<PersonDto>, List<PersonDto>)> AddOrUpdate(List<PersonDto> employees)
+    public async Task<(List<PersonDto>, List<PersonDto>)> AddOrUpdate(List<PersonDto> employees, bool externalCall = false)
     {
+        if (externalCall)
+        {
+            await SynchronizeIds(employees);
+        }
         var novotecEmployeeIds = await GetNovotecIds(employees);
         var existingEmployees = await _context.Employees.Where(x => novotecEmployeeIds.Select(c => c.NovotecId).Contains(x.Emident)).ToListAsync();
         var addedEmployees = employees.Where(a => !existingEmployees.Select(b => b.Empersno).Contains(a.PersonalNumber)).ToList();
