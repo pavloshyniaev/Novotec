@@ -19,17 +19,21 @@ public class EmployeeRepository : IEmployeeRepository
         _connectorContext = connectorContext;
     }
     
-    public async Task<SynchronizedEmployeesDto> SynchronizeEmployees(List<PersonDto> employees)
+    public async Task<SynchronizedEmployeesDto> SynchronizeEmployees(List<PersonDto> employees, bool onlyUpdate)
     {
         await SynchronizeIds(employees);
         var result = await AddOrUpdate(employees);
+        var deletedEmployees = new List<PersonDto>();
 
-        var novotecEmployeeIds = await GetNovotecIds(employees);
-        var employeesToDelete = await _context.Employees
-            .Where(x => !novotecEmployeeIds.Select(c => c.NovotecId).Contains(x.Emident))
-            .ToListAsync();
+        if (!onlyUpdate)
+        {
+            var novotecEmployeeIds = await GetNovotecIds(employees);
+            var employeesToDelete = await _context.Employees
+                .Where(x => !novotecEmployeeIds.Select(c => c.NovotecId).Contains(x.Emident))
+                .ToListAsync();
 
-        var deletedEmployees = await DeleteEmployees(employeesToDelete, false);
+            deletedEmployees = await DeleteEmployees(employeesToDelete, false);
+        }
         
         return new SynchronizedEmployeesDto(result.Item1, result.Item2, deletedEmployees);
     }

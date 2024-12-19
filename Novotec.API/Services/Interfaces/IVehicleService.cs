@@ -4,7 +4,7 @@ namespace Novotec.API.Interfaces;
 
 public interface IVehicleService
 {
-    Task<SynchronizedVehiclesDto> Synchronize();
+    Task<SynchronizedVehiclesDto> Synchronize(bool onlyUpdate);
     Task<SynchronizedVehiclesDto> AddOrUpdate(List<VehicleDto> vehicles);
     Task<List<VehicleDto>> Get();
 }

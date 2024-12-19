@@ -17,12 +17,26 @@ public class VehicleController : ControllerBase
     }
 
     [HttpPost]
-    [Route("synchronize")]
-    public async Task<IActionResult> Synchronize()
+    [Route("fullSynchronize")]
+    public async Task<IActionResult> FullSynchronize()
     {
         try
         {
-            var synchronizedVehicles = await _vehicleService.Synchronize();
+            var synchronizedVehicles = await _vehicleService.Synchronize(false);
+            return Ok(synchronizedVehicles);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    [HttpPost]
+    [Route("partialSynchronize")]
+    public async Task<IActionResult> PartialSynchronize()
+    {
+        try
+        {
+            var synchronizedVehicles = await _vehicleService.Synchronize(true);
             return Ok(synchronizedVehicles);
         }
         catch (Exception ex)

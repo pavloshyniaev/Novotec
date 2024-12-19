@@ -14,14 +14,14 @@ public class EmployeeService : IEmployeeService
         _apiService = apiService;
     }
 
-    public async Task<SynchronizedEmployeesDto> Synchronize()
+    public async Task<SynchronizedEmployeesDto> Synchronize(bool onlyUpdate)
     {
         var employees = await _apiService.FetchData<List<PersonDto>>("/tank-station/persons");
         if (employees == null)
         {
             throw new ArgumentNullException("Employees not found");
         }
-        return await _employeeRepository.SynchronizeEmployees(employees);
+        return await _employeeRepository.SynchronizeEmployees(employees, onlyUpdate);
     }
 
     public async Task<SynchronizedEmployeesDto> AddOrUpdate(List<PersonDto> employees)

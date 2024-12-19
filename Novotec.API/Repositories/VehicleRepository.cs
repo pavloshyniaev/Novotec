@@ -19,18 +19,21 @@ public class VehicleRepository : IVehicleRepository
         _connectorContext = connectorContext;
     }
     
-    public async Task<SynchronizedVehiclesDto> SynchronizeVehicles(List<VehicleDto> vehicles)
+    public async Task<SynchronizedVehiclesDto> SynchronizeVehicles(List<VehicleDto> vehicles, bool onlyUpdate)
     {
         await SynchronizeIds(vehicles);
-        
+        var deletedVehicles = new List<VehicleDto>();
         var synchronizedVehicles = await AddOrUpdate(vehicles);
         
-        var novotecVehicleIds = await GetNovotecIds(vehicles);
-        var vehiclesToDelete = await _context.Vehicles
-            .Where(x => !novotecVehicleIds.Select(c => c.NovotecId).Contains(x.Veident))
-            .ToListAsync();
+        if (!onlyUpdate)
+        {
+            var novotecVehicleIds = await GetNovotecIds(vehicles);
+            var vehiclesToDelete = await _context.Vehicles
+                .Where(x => !novotecVehicleIds.Select(c => c.NovotecId).Contains(x.Veident))
+                .ToListAsync();
 
-        var deletedVehicles = await DeleteVehicles(vehiclesToDelete, false);
+            deletedVehicles = await DeleteVehicles(vehiclesToDelete, false);
+        }
         
         return new SynchronizedVehiclesDto(synchronizedVehicles.Item1, synchronizedVehicles.Item2, deletedVehicles);
     }

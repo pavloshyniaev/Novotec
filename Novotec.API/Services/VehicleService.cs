@@ -14,14 +14,14 @@ public class VehicleService : IVehicleService
         _apiService = apiService;
     }
 
-    public async Task<SynchronizedVehiclesDto> Synchronize()
+    public async Task<SynchronizedVehiclesDto> Synchronize(bool onlyUpdate)
     {
         var vehicles = await _apiService.FetchData<List<VehicleDto>>("/tank-station/vehicles");
         if (vehicles == null)
         {
             throw new ArgumentNullException("Vehicles not found");
         }
-        return await _vehicleRepository.SynchronizeVehicles(vehicles);
+        return await _vehicleRepository.SynchronizeVehicles(vehicles, onlyUpdate);
     }
 
     public async Task<SynchronizedVehiclesDto> AddOrUpdate(List<VehicleDto> vehicles)

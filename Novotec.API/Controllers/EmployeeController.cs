@@ -17,12 +17,26 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpPost]
-    [Route("synchronize")]
-    public async Task<IActionResult> Synchronize()
+    [Route("fullSynchronize")]
+    public async Task<IActionResult> FullSynchronize()
     {
         try
         {
-            var synchronizedEmployeesLists = await _employeeService.Synchronize();
+            var synchronizedEmployeesLists = await _employeeService.Synchronize(false);
+            return Ok(synchronizedEmployeesLists);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    [HttpPost]
+    [Route("partialSynchronize")]
+    public async Task<IActionResult> PartialSynchronize()
+    {
+        try
+        {
+            var synchronizedEmployeesLists = await _employeeService.Synchronize(true);
             return Ok(synchronizedEmployeesLists);
         }
         catch (Exception ex)
